@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{trans.title})}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<main class="page">
+  <div class="container-wide">
+    <!-- Hero Header -->
+    <section class="section-heading center-heading reveal">
+      <span class="eyebrow" th:text="#{trans.badge}">पारदर्शकता</span>
+      <h1 th:text="#{trans.title}">विश्वासासाठी संपूर्ण पारदर्शकता</h1>
+      <p th:text="#{trans.desc}">प्लॅटफॉर्मवरील सर्व शाळा, शैक्षणिक गरजा, मिळालेल्या देणग्या आणि प्रगती अहवाल सार्वजनिकरीत्या उपलब्ध आहेत.</p>
+    </section>
+
+    <!-- 4 High-Impact Metric Cards -->
+    <div class="metric-grid mb-4">
+      <div class="metric-card reveal">
+        <span th:text="#{trans.totalFunds}">एकूण जमा निधी</span>
+        <strong class="text-success" th:text="'₹' + ${#numbers.formatDecimal(totalDonations, 1, 0)}">₹०</strong>
+        <small th:text="${recentDonations.size()} + ' ' + #{adminDash.kpiDonationCount}">० देणगी नोंदी</small>
+      </div>
+
+      <div class="metric-card reveal delay-1">
+        <span th:text="#{trans.totalSchools}">पडताळलेल्या शाळा</span>
+        <strong th:text="${verifiedSchoolsCount}">0</strong>
+        <small th:text="#{home.hero.verifiedText}">सुरक्षित आणि अधिकृत</small>
+      </div>
+
+      <div class="metric-card reveal delay-2">
+        <span th:text="#{trans.activeNeeds}">सक्रिय गरजा</span>
+        <strong class="text-warning" th:text="${openNeedsCount}">0</strong>
+        <small th:text="#{donorDash.recommendedNeeds}">मदतीसाठी गरजा</small>
+      </div>
+
+      <div class="metric-card reveal delay-3">
+        <span th:text="#{trans.completedNeeds}">पूर्ण झालेल्या गरजा</span>
+        <strong class="text-success" th:text="${completedNeedsCount}">0</strong>
+        <small th:text="#{home.step4.title}">प्रगती आणि परिणाम</small>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <!-- Left Column: Recent Public Donations Stream -->
+      <section class="panel-card reveal">
+        <div class="panel-header">
+          <div>
+            <span class="eyebrow" th:text="#{donorDash.donationHistory}">देणगी प्रवाह</span>
+            <h2 th:text="#{trans.recentDonations}">अलीकडील देणगी नोंदी</h2>
+          </div>
+          <span class="soft-label" th:text="#{footer.promiseText}">सोपे • सुरक्षित • पारदर्शक</span>
+        </div>
+
+        <div th:if="${recentDonations.isEmpty()}" class="empty-state small-empty">
+          <div class="empty-icon">🤝</div>
+          <h3 th:text="#{adminDash.noDonations}">कोणतीही देणगी नोंद उपलब्ध नाही.</h3>
+        </div>
+
+        <div class="donation-stream" th:if="${!recentDonations.isEmpty()}">
+          <div class="donation-stream-item" th:each="d : ${recentDonations}">
+            <div class="don-avatar">✓</div>
+            <div class="don-info">
+              <div class="don-headline">
+                <strong><span th:text="${d.donor != null ? d.donor.fullName : 'Anonymous'}">नाव</span></strong>
+                <span class="don-arrow" th:text="${#locale.language == 'en' ? '→' : 'कडून →'}">कडून</span>
+                <strong th:text="${d.school != null ? d.school.name : 'शाळा'}">शाळा</strong>
+              </div>
+              <small class="text-muted">
+                <span th:text="#{adminDash.tabNeeds} + ':'">गरज:</span> <span th:text="${d.need != null ? d.need.title : '-'}">गरज</span> ·
+                <span th:text="#{adminDash.tblDate} + ':'">दिनांक:</span> <span th:text="${#temporals.format(d.donationDate, 'dd/MM/yyyy HH:mm')}">दिनांक</span>
+              </small>
+              <p class="don-quote" th:if="${d.message != null && !d.message.isBlank()}" th:text="'&ldquo;' + ${d.message} + '&rdquo;'"></p>
+            </div>
+            <div class="don-amount-box">
+              <strong th:text="'₹' + ${#numbers.formatDecimal(d.amount, 1, 0)}">₹०</strong>
+              <small><code><span th:text="${d.transactionRef}">TXN</span></code></small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Progress Reports Stream -->
+      <aside class="sidebar-column reveal delay-1">
+        <div class="impact-card">
+          <div class="impact-icon">📈</div>
+          <span class="eyebrow" th:text="#{home.step4.title}">प्रत्यक्ष परिणाम</span>
+          <h3 th:text="#{trans.progressTimeline}">प्रगती आणि परिणाम अहवाल</h3>
+          <p class="text-muted small" th:text="#{prog.desc}">शाळांनी प्रत्यक्ष केलेल्या कामाचे ताजे अहवाल:</p>
+
+          <div th:if="${progressUpdates.isEmpty()}" class="mini-empty" th:text="#{details.noProgress}">
+            अद्याप प्रगती अहवाल उपलब्ध नाहीत.
+          </div>
+
+          <div class="timeline-stream" th:if="${!progressUpdates.isEmpty()}">
+            <div class="timeline-entry" th:each="p : ${progressUpdates}">
+              <div class="timeline-dot"></div>
+              <div class="timeline-body">
+                <div class="timeline-top">
+                  <strong th:text="${p.title}">अपडेट</strong>
+                  <span class="percent-badge" th:text="${p.progressPercent} + '%'">०%</span>
+                </div>
+                <small class="d-block text-muted mb-1">🏫 <span th:text="${p.school != null ? p.school.name : 'शाळा'}">शाळा</span></small>
+                <div class="progress-bar tiny"><i th:style="'width:' + ${p.progressPercent} + '%'"></i></div>
+                <p class="timeline-desc" th:text="${p.description}">वर्णन...</p>
+                <div class="timeline-image-wrap" th:if="${p.imageUrl != null && !p.imageUrl.isBlank()}">
+                  <img th:src="${p.imageUrl}" alt="Update Image" class="timeline-img" onerror="this.style.display='none'">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script src="/js/app.js"></script>
+</body>
+</html>

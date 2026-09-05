@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{donorDash.title})}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<main class="page">
+  <div class="container-wide">
+    <div th:replace="~{fragments/alerts :: messages}"></div>
+
+    <!-- Donor Header Hero -->
+    <section class="dashboard-hero reveal">
+      <div>
+        <span class="eyebrow" th:text="#{donorDash.badge}">देणगीदार कक्ष</span>
+        <h1 th:text="#{donorDash.title}">देणगीदार नियंत्रण कक्ष</h1>
+        <p th:text="#{donorDash.desc}">शाळांना केलेले सहकार्य आणि विद्यार्थ्यांच्या प्रगतीचा मागोवा येथे घ्या.</p>
+      </div>
+
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/schools" th:text="#{donorDash.findSchools}">शाळा शोधा</a>
+        <a class="btn btn-soft" href="/transparency" th:text="#{adminDash.viewTrans}">पारदर्शकता अहवाल →</a>
+      </div>
+    </section>
+
+    <!-- Metrics -->
+    <div class="metric-grid">
+      <div class="metric-card reveal">
+        <span th:text="#{donorDash.totalDonated}">तुमचे एकूण योगदान</span>
+        <strong class="text-success" th:text="'₹' + ${#numbers.formatDecimal(totalDonated, 1, 0)}">₹०</strong>
+        <small th:text="${donations.size()} + ' ' + #{adminDash.kpiDonationCount}">० देणगी नोंदी</small>
+      </div>
+
+      <div class="metric-card reveal delay-1">
+        <span th:text="#{donorDash.supportedSchools}">मदत केलेल्या शाळा</span>
+        <strong th:text="${schoolsSupported}">0</strong>
+        <small th:text="#{nav.schools}">शाळा</small>
+      </div>
+
+      <div class="metric-card reveal delay-2">
+        <span th:text="#{adminDash.tabNeeds}">मदत केलेल्या गरजा</span>
+        <strong th:text="${donations.size()}">0</strong>
+        <small th:text="#{footer.promiseText}">सोपे • सुरक्षित • पारदर्शक</small>
+      </div>
+    </div>
+
+    <!-- Donation History Table -->
+    <section class="panel-card mt-3 reveal">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow" th:text="#{donorDash.badge}">योगदान नोंद</span>
+          <h2 th:text="#{donorDash.donationHistory}">देणगी इतिहास</h2>
+        </div>
+        <a href="/schools" class="text-link" th:text="#{donorDash.findSchools} + ' →'">नवीन शाळा शोधा →</a>
+      </div>
+
+      <div th:if="${donations.isEmpty()}" class="empty-state small-empty">
+        <div class="empty-icon">🤝</div>
+        <h3 th:text="#{donorDash.noDonations}">अद्याप कोणतीही देणगी नोंदवलेली नाही. शाळा निवडून पहिले योगदान द्या!</h3>
+        <p th:text="#{schools.desc}">महाराष्ट्रातील शाळांच्या गरजा पहा आणि विद्यार्थ्यांना शिक्षणासाठी मदत करा.</p>
+        <a class="btn btn-primary btn-sm mt-2" href="/schools" th:text="#{donorDash.findSchools}">शाळांची यादी पाहा</a>
+      </div>
+
+      <div class="table-responsive" th:if="${!donations.isEmpty()}">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th th:text="#{adminDash.tblDate}">दिनांक</th>
+              <th th:text="#{adminDash.tblSchool}">शाळा</th>
+              <th th:text="#{adminDash.tabNeeds}">गरज</th>
+              <th th:text="#{adminDash.tblAmount}">योगदान रक्कम</th>
+              <th th:text="#{donate.message}">संदेश</th>
+              <th th:text="#{adminDash.tblStatus}">स्थिती</th>
+              <th th:text="#{adminDash.tblTxnRef}">नोंद क्रमांक</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="d : ${donations}">
+              <td><span th:text="${#temporals.format(d.donationDate, 'dd/MM/yyyy HH:mm')}">दिनांक</span></td>
+              <td>
+                <a th:href="@{'/schools/' + ${d.school != null ? d.school.id : 1}}" class="school-link-bold">
+                  🏫 <span th:text="${d.school != null ? d.school.name : 'शाळा'}">शाळा नाव</span>
+                </a>
+                <small class="d-block text-muted" th:if="${d.school != null}">📍 <span th:text="${d.school.district}">जिल्हा</span></small>
+              </td>
+              <td>
+                <strong th:text="${d.need != null ? d.need.title : '-'}">गरज</strong>
+                <small class="d-block text-muted" th:if="${d.need != null}" th:text="#{${'cat.' + d.need.category}}">श्रेणी</small>
+              </td>
+              <td><strong class="text-success" th:text="'₹' + ${#numbers.formatDecimal(d.amount, 1, 0)}">₹०</strong></td>
+              <td><span class="text-muted" th:text="${d.message != null && !d.message.isBlank() ? d.message : '-'}">-</span></td>
+              <td><span class="status-pill verified" th:text="#{status.VERIFIED}">✓ यशस्वी</span></td>
+              <td><code><span th:text="${d.transactionRef}">TXN-123</span></code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Recommended Active Needs to Support -->
+    <section class="panel-card mt-3 reveal">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow" th:text="#{home.hero.badge}">शिक्षणासाठी सहकार्य</span>
+          <h2 th:text="#{donorDash.recommendedNeeds}">सक्रिय गरजा</h2>
+        </div>
+        <a href="/schools" class="text-link" th:text="#{home.featured.viewAll}">सर्व गरजा पाहा →</a>
+      </div>
+
+      <div class="school-grid">
+        <article class="need-card" th:each="n : ${activeNeeds}">
+          <div class="need-head">
+            <span class="category-tag" th:text="#{${'cat.' + n.category}}">श्रेणी</span>
+            <span class="priority-pill" th:classappend="${n.priority}" th:text="#{${'priority.' + n.priority}}">NORMAL</span>
+          </div>
+
+          <h3 th:text="${n.title}">गरजेचे शीर्षक</h3>
+          <p class="school-attribution" th:if="${n.school != null}">
+            🏫 <span th:text="${n.school.name}">शाळा</span> (📍 <span th:text="${n.school.district}">जिल्हा</span>)
+          </p>
+          <p class="need-desc-text" th:text="${n.description}">वर्णन</p>
+
+          <div class="progress-meta">
+            <span><span th:text="#{details.raised}">जमा</span>: <strong th:text="'₹' + ${#numbers.formatDecimal(n.receivedAmount, 1, 0)}">₹०</strong></span>
+            <span><span th:text="#{details.goal}">लक्ष्य</span>: <strong th:text="'₹' + ${#numbers.formatDecimal(n.targetAmount, 1, 0)}">₹०</strong></span>
+          </div>
+          <div class="progress-bar">
+            <i th:style="'width:' + ${n.percentRaised} + '%'"></i>
+          </div>
+
+          <div class="need-action">
+            <small><span th:text="${n.percentRaised}">0</span>%</small>
+            <a class="btn btn-primary btn-sm" th:href="@{'/donate/' + ${n.id}}" th:text="#{details.donateBtn}">मदत करा</a>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script src="/js/app.js"></script>
+</body>
+</html>

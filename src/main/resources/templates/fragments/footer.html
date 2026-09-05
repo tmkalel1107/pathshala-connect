@@ -1,0 +1,51 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="foot" class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <a class="brand footer-brand" href="/">
+        <span class="brand-mark">📚</span>
+        <div class="brand-text">
+          <span class="brand-name"><strong th:text="#{nav.brand}">पाठशाळा कनेक्ट</strong></span>
+          <small class="brand-tagline" th:text="#{nav.brand.sub}">शाळांना सक्षम करणारे, समाजाला जोडणारे व्यासपीठ</small>
+        </div>
+      </a>
+      <p th:text="#{footer.tagline}">शाळा, दाते आणि समाज यांना विश्वासाने जोडणारे पारदर्शक व्यासपीठ.</p>
+      <div class="footer-badges">
+        <span>🇮🇳 <span th:text="#{footer.badge1}">अस्सल मराठी</span></span>
+        <span>🛡️ <span th:text="#{footer.badge2}">१००% पारदर्शक</span></span>
+        <span>🤝 <span th:text="#{footer.badge3}">समाज सहकार्य</span></span>
+      </div>
+    </div>
+
+    <div>
+      <h4 th:text="#{footer.links}">महत्त्वाचे दुवे</h4>
+      <a href="/" th:text="#{nav.home}">मुख्यपृष्ठ</a>
+      <a href="/schools" th:text="#{nav.schools}">शाळा निर्देशिका</a>
+      <a href="/transparency" th:text="#{nav.transparency}">पारदर्शकता</a>
+      <a href="/register" th:text="#{nav.register}">नोंदणी</a>
+      <a href="/login" th:text="#{nav.login}">प्रवेश करा</a>
+    </div>
+
+    <div>
+      <h4 th:text="#{footer.roles}">प्लॅटफॉर्म भूमिका</h4>
+      <span>🏫 <span th:text="#{footer.school}">शाळा प्रशासन</span></span>
+      <span>🤝 <span th:text="#{footer.donor}">देणगीदार</span></span>
+      <span>🛡️ <span th:text="#{footer.admin}">मुख्य प्रशासन</span></span>
+    </div>
+
+    <div>
+      <h4 th:text="#{footer.promise}">आमचे ब्रीद</h4>
+      <p class="promise-highlight" th:text="#{footer.promiseText}">सोपे • सुरक्षित • पारदर्शक</p>
+      <small th:text="#{footer.rights}">शिक्षण • विश्वास • सामाजिक परिणाम</small>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span th:text="#{footer.copyright}">© २०२६ पाठशाळा कनेक्ट. सर्व हक्क सुरक्षित.</span>
+    <span th:text="' · ' + #{footer.tech}"> · स्प्रिंग बूट, जावा आणि मायएसक्यूएल द्वारे संचलित</span>
+  </div>
+</footer>
+</body>
+</html>

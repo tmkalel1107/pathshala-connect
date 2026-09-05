@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{login.formTitle})}"></head>
+<body class="auth-page">
+<div class="auth-shell">
+  <!-- Top Brand Bar -->
+  <div class="auth-brandbar">
+    <a class="brand" href="/">
+      <span class="brand-mark">📚</span>
+      <div class="brand-text">
+        <span class="brand-name"><strong th:text="#{nav.brand}">पाठशाळा कनेक्ट</strong></span>
+        <small class="brand-tagline" th:text="#{nav.brand.sub}">शाळांना सक्षम करणारे, समाजाला जोडणारे व्यासपीठ</small>
+      </div>
+    </a>
+    <div class="auth-top-actions">
+      <button class="lang-switch-btn" type="button" onclick="switchLanguage()">
+        <span>🌐</span> <span id="langCurrentLabel" th:text="${#locale.language == 'en' ? 'मराठी' : 'English'}">English</span>
+      </button>
+      <a href="/" class="text-link small" th:text="'← ' + #{nav.home}">← मुख्यपृष्ठ</a>
+    </div>
+  </div>
+
+  <div class="auth-grid">
+    <!-- Left Column: Context / Mission -->
+    <section class="auth-intro">
+      <span class="eyebrow" th:text="#{login.badge}">पुन्हा स्वागत आहे</span>
+      <h1 th:text="#{login.title}">तुमच्या शिक्षण प्रवासात पुन्हा स्वागत</h1>
+      <p class="intro-copy" th:text="#{login.desc}">आपल्या खात्यात सुरक्षितपणे प्रवेश करा आणि शाळा, मदत किंवा प्रशासकीय कामे सुरू ठेवा.</p>
+
+      <div class="intro-features">
+        <div class="intro-feature">
+          <div class="feat-icon">🏫</div>
+          <div>
+            <h3 th:text="#{home.step1.title}">शाळा नोंदणी</h3>
+            <p th:text="#{reg.schoolRoleDesc}">शाळेची माहिती, शैक्षणिक गरजा आणि प्रगती अहवाल व्यवस्थापित करा.</p>
+          </div>
+        </div>
+
+        <div class="intro-feature">
+          <div class="feat-icon">🤝</div>
+          <div>
+            <h3 th:text="#{home.step3.title}">देणगीदारांचे सहकार्य</h3>
+            <p th:text="#{reg.donorRoleDesc}">गरजू शाळांना सहकार्य करा आणि मदतीचा प्रत्यक्ष परिणाम पाहा.</p>
+          </div>
+        </div>
+
+        <div class="intro-feature">
+          <div class="feat-icon">🛡️</div>
+          <div>
+            <h3 th:text="#{home.step2.title}">प्रशासन पडताळणी</h3>
+            <p th:text="#{adminDash.desc}">शाळा मंजुरी, शैक्षणिक गरजा, प्रगती अहवाल, वापरकर्ते आणि देणगी हिशोब व्यवस्थापन.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Login Card -->
+    <section class="form-card auth-card">
+      <div class="form-heading">
+        <span class="form-icon">🔐</span>
+        <div>
+          <h2 th:text="#{login.welcome}">स्वागत आहे!</h2>
+          <p th:text="#{login.formDesc}">खात्यात प्रवेश करण्यासाठी आपली माहिती भरा.</p>
+        </div>
+      </div>
+
+      <!-- Error / Success Flash Messages -->
+      <div th:replace="~{fragments/alerts :: messages}"></div>
+
+      <form method="post" action="/login" class="form-stack">
+        <label>
+          <span th:text="#{login.email}">ई-मेल पत्ता *</span>
+          <input type="email" name="email" autocomplete="email" placeholder="you@example.com" required autofocus>
+        </label>
+
+        <label>
+          <span th:text="#{login.password}">पासवर्ड *</span>
+          <div class="password-wrap">
+            <input id="loginPw" type="password" name="password" autocomplete="current-password" placeholder="••••••••" required>
+            <button type="button" class="password-toggle" onclick="togglePassword('loginPw', this)" th:text="#{login.show}">दाखवा</button>
+          </div>
+        </label>
+
+        <div class="form-row-between">
+          <label class="check-label">
+            <input type="checkbox" name="remember">
+            <span th:text="#{login.remember}">मला लक्षात ठेवा</span>
+          </label>
+          <a class="text-link small" href="mailto:admin@pathshala.com" th:text="#{login.forgot}">पासवर्ड विसरलात?</a>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" type="submit" th:text="#{login.submit}">प्रवेश करा</button>
+      </form>
+
+      <div class="divider">
+        <span th:text="#{login.new}">नवीन आहात?</span>
+      </div>
+
+      <div class="register-choices">
+        <a href="/register?role=SCHOOL" class="btn btn-soft btn-block mb-2">
+          🏫 <span th:text="#{login.asSchool}">शाळा म्हणून नोंदणी करा</span>
+        </a>
+        <a href="/register?role=DONOR" class="btn btn-outline btn-block">
+          🤝 <span th:text="#{login.asDonor}">देणगीदार म्हणून नोंदणी करा</span>
+        </a>
+      </div>
+
+      <!-- Test Accounts Info Box -->
+      <div class="demo-box">
+        <div class="demo-badge" th:text="#{login.demo}">चाचणी खाती</div>
+        <div class="demo-credentials">
+          <div class="demo-row">
+            <strong th:text="'🛡️ ' + #{role.ADMIN} + ':'">🛡️ प्रशासक:</strong>
+            <span>admin@pathshala.com</span> · <span>admin123</span>
+          </div>
+          <div class="demo-row">
+            <strong th:text="'🏫 ' + #{role.SCHOOL} + ':'">🏫 शाळा:</strong>
+            <span>school@pathshala.com</span> · <span>school123</span>
+          </div>
+          <div class="demo-row">
+            <strong th:text="'🤝 ' + #{role.DONOR} + ':'">🤝 देणगीदार:</strong>
+            <span>donor@pathshala.com</span> · <span>donor123</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>

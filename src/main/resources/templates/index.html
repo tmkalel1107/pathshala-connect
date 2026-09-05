@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('प्रत्येक शाळेला प्रगतीची संधी')}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<main>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-text reveal">
+        <span class="eyebrow" th:text="#{home.hero.badge}">शिक्षणासाठी एकत्र</span>
+        <h1 th:text="#{home.hero.title}">प्रत्येक शाळेला प्रगतीची संधी</h1>
+        <p class="hero-lead" th:text="#{home.hero.desc}">
+          Pathshala Connect गरजू शाळांना देणगीदार आणि मदतकर्त्यांशी जोडते, जेणेकरून ग्रामीण व गरजू शाळांमध्ये दर्जेदार शिक्षण, पायाभूत सुविधा आणि विद्यार्थ्यांसाठी नवनवीन संधी निर्माण करता येतील.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="/schools" th:text="#{home.hero.findSchools}">शाळा शोधा</a>
+          <a class="btn btn-soft btn-lg" href="/register" th:text="#{home.hero.donate}">सहकार्य करा</a>
+          <a class="btn btn-outline btn-lg" href="/register?role=SCHOOL" th:text="#{home.hero.registerSchool}">शाळा नोंदणी</a>
+        </div>
+        <div class="trust-row">
+          <span>✓ <span th:text="#{home.trust.verified}">पडताळलेल्या शाळा</span></span>
+          <span>✓ <span th:text="#{home.trust.transparent}">१००% पारदर्शक नोंदी</span></span>
+          <span>✓ <span th:text="#{home.trust.secure}">सुरक्षित खाते व्यवस्था</span></span>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal delay-1" aria-hidden="true">
+        <div class="visual-card">
+          <div class="visual-top">
+            <span class="mini-pill">PATHSHALA CONNECT · पाठशाळा</span>
+            <span class="pulse-dot"></span>
+          </div>
+          <div class="school-illustration">
+            <div class="cloud c1"></div>
+            <div class="cloud c2"></div>
+            <div class="sun"></div>
+            <div class="building">
+              <span>🏫</span>
+              <i></i><i></i><i></i>
+            </div>
+            <div class="ground"></div>
+            <div class="tree t1">🌳</div>
+            <div class="tree t2">🌱</div>
+          </div>
+          <div class="floating-card fc-one">
+            <span>✓</span>
+            <div>
+              <b th:text="#{home.hero.verifiedBadge}">Verified School</b>
+              <small th:text="#{home.hero.verifiedText}">पडताळणी पूर्ण</small>
+            </div>
+          </div>
+          <div class="floating-card fc-two">
+            <span>₹</span>
+            <div>
+              <b>₹१,५०,०००</b>
+              <small th:text="#{home.hero.sampleNeed}">डिजिटल शिक्षण गरज</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Statistics Strip -->
+  <section class="stats-strip">
+    <div class="container stat-grid">
+      <div class="stat-item">
+        <strong th:text="${totalSchools}">२+</strong>
+        <span th:text="#{home.stats.schools}">पडताळलेल्या शाळा</span>
+      </div>
+      <div class="stat-item">
+        <strong th:text="${totalNeeds}">३+</strong>
+        <span th:text="#{home.stats.needs}">सक्रिय गरजा</span>
+      </div>
+      <div class="stat-item">
+        <strong th:text="'₹' + ${#numbers.formatDecimal(totalDonations, 1, 'COMMA', 0, 'POINT')}">₹७५,०००</strong>
+        <span th:text="#{home.stats.donations}">एकूण सहाय्य निधी</span>
+      </div>
+      <div class="stat-item">
+        <strong>१००%</strong>
+        <span th:text="#{home.stats.transparency}">पारदर्शकता</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="about" class="section">
+    <div class="container">
+      <div class="section-heading center-heading">
+        <span class="eyebrow" th:text="#{home.how.badge}">कसे कार्य करते?</span>
+        <h2 th:text="#{home.how.title}">सोपे, सुरक्षित आणि पारदर्शक</h2>
+        <p th:text="#{home.how.desc}">योग्य शाळेपर्यंत योग्य मदत पोहोचावी यासाठी प्रत्येक टप्पा सुलभ आणि पारदर्शक ठेवला आहे.</p>
+      </div>
+
+      <div class="steps-grid">
+        <article class="step-card reveal">
+          <span class="step-num">01</span>
+          <div class="step-icon">🏫</div>
+          <h3 th:text="#{home.step1.title}">शाळा नोंदणी</h3>
+          <p th:text="#{home.step1.desc}">शाळा आपली अधिकृत माहिती आणि शैक्षणिक गरजा नोंदवते.</p>
+        </article>
+
+        <article class="step-card reveal delay-1">
+          <span class="step-num">02</span>
+          <div class="step-icon">🛡️</div>
+          <h3 th:text="#{home.step2.title}">प्रशासन पडताळणी</h3>
+          <p th:text="#{home.step2.desc}">प्लॅटफॉर्म ॲडमिन शाळेची माहिती व गरजांची खात्री करतो.</p>
+        </article>
+
+        <article class="step-card reveal delay-2">
+          <span class="step-num">03</span>
+          <div class="step-icon">🤝</div>
+          <h3 th:text="#{home.step3.title}">देणगीदारांचे सहकार्य</h3>
+          <p th:text="#{home.step3.desc}">देणगीदार गरजा पाहून थेट शैक्षणिक कामाला हातभार लावतात.</p>
+        </article>
+
+        <article class="step-card reveal delay-3">
+          <span class="step-num">04</span>
+          <div class="step-icon">📈</div>
+          <h3 th:text="#{home.step4.title}">प्रगती आणि परिणाम</h3>
+          <p th:text="#{home.step4.desc}">शाळा प्रत्यक्ष कामाचे फोटो व प्रगती अपडेट्स शेअर करते.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Verified Schools Section -->
+  <section class="section section-tint">
+    <div class="container">
+      <div class="section-heading split-heading">
+        <div>
+          <span class="eyebrow" th:text="#{home.featured.badge}">विश्वसनीय निर्देशिका</span>
+          <h2 th:text="#{home.featured.title}">पडताळलेल्या शाळा</h2>
+        </div>
+        <a class="text-link" href="/schools" th:text="#{home.featured.viewAll}">सर्व शाळा पाहा →</a>
+      </div>
+
+      <div class="school-grid">
+        <article class="school-card reveal" th:each="s : ${schools}">
+          <div class="card-top">
+            <div class="school-avatar">🏫</div>
+            <span class="status-badge">✓ <span th:text="#{common.verified}">पडताळलेले</span></span>
+          </div>
+          <h3 th:text="${s.name}">शाळेचे नाव</h3>
+          <p class="location">📍 <span th:text="${s.district}">जिल्हा</span> · <span th:text="${s.villageCity}">गाव</span></p>
+          <p class="card-description" th:text="${s.description}">शाळेचे वर्णन</p>
+          <div class="card-footer-action">
+            <a class="btn btn-soft btn-block" th:href="@{'/schools/' + ${s.id}}" th:text="#{common.viewDetails}">तपशील पाहा →</a>
+          </div>
+        </article>
+
+        <div class="empty-state" th:if="${schools.isEmpty()}">
+          <div>🏫</div>
+          <h3 th:text="#{common.noSchools}">सध्या पडताळलेल्या शाळा उपलब्ध नाहीत.</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Active Needs Section -->
+  <section class="section">
+    <div class="container">
+      <div class="section-heading split-heading">
+        <div>
+          <span class="eyebrow" th:text="#{home.needs.badge}">मदतीची आवश्यकता</span>
+          <h2 th:text="#{home.needs.title}">सक्रिय शैक्षणिक गरजा</h2>
+        </div>
+        <a class="text-link" href="/schools" th:text="#{home.featured.viewAll}">सर्व गरजा पाहा →</a>
+      </div>
+
+      <div class="needs-preview-grid">
+        <article class="need-card reveal" th:each="n : ${needs}">
+          <div class="need-head">
+            <span class="category-tag" th:text="#{${'cat.' + n.category}}">श्रेणी</span>
+            <span class="priority-pill" th:classappend="${n.priority}" th:text="#{${'priority.' + n.priority}}">NORMAL</span>
+          </div>
+          <h3 th:text="${n.title}">गरजेचे शीर्षक</h3>
+          <p class="school-attribution" th:if="${n.school != null}">
+            🏫 <span th:text="${n.school.name}">शाळा</span> (📍 <span th:text="${n.school.district}">जिल्हा</span>)
+          </p>
+          <p class="need-desc-text" th:text="${n.description}">वर्णन</p>
+
+          <div class="progress-meta">
+            <span><span th:text="#{details.raised}">मिळाले</span>: <strong th:text="'₹' + ${#numbers.formatDecimal(n.receivedAmount, 1, 0)}">₹०</strong></span>
+            <span><span th:text="#{details.goal}">लक्ष्य</span>: <strong th:text="'₹' + ${#numbers.formatDecimal(n.targetAmount, 1, 0)}">₹०</strong></span>
+          </div>
+          <div class="progress-bar">
+            <i th:style="'width:' + ${n.percentRaised} + '%'"></i>
+          </div>
+
+          <div class="need-action">
+            <small><span th:text="${n.percentRaised}">0</span>%</small>
+            <a class="btn btn-primary btn-sm" th:if="${session.role == 'DONOR'}" th:href="@{'/donate/' + ${n.id}}" th:text="#{details.donateBtn}">सहकार्य करा</a>
+            <a class="btn btn-soft btn-sm" th:if="${session.uid == null}" href="/login" th:text="#{details.loginToDonate}">लॉगिन करून मदत करा</a>
+            <a class="btn btn-outline btn-sm" th:if="${n.school != null}" th:href="@{'/schools/' + ${n.school.id}}" th:text="#{common.viewDetails}">शाळा तपशील</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call To Action -->
+  <section class="section cta-section">
+    <div class="container cta-card reveal">
+      <div class="cta-content">
+        <span class="eyebrow-light" th:text="#{home.cta.badge}">शिक्षणाचा बदल घडवा</span>
+        <h2 th:text="#{home.cta.title}">आपल्या सहभागाने एका शाळेचे भविष्य बदलू शकते</h2>
+        <p th:text="#{home.cta.desc}">शाळा म्हणून गरजा नोंदवा किंवा देणगीदार म्हणून ग्रामीण शिक्षणाला बळ द्या. आजच पाठशाळा कनेक्टमध्ये सहभागी व्हा.</p>
+        <div class="cta-buttons">
+          <a class="btn btn-white btn-lg" href="/register?role=DONOR" th:text="'🤝 ' + #{home.cta.joinDonor}">🤝 देणगीदार म्हणून जोडा</a>
+          <a class="btn btn-outline-white btn-lg" href="/register?role=SCHOOL" th:text="'🏫 ' + #{home.cta.joinSchool}">🏫 शाळा नोंदणी करा</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script src="/js/app.js"></script>
+</body>
+</html>

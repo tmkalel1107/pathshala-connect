@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('शाळा निर्देशिका | School Directory')}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<main class="page">
+  <div class="container">
+    <!-- Page Hero Banner -->
+    <div class="page-hero">
+      <div>
+        <span class="eyebrow" th:text="#{schools.badge}">विश्वसनीय शाळा निर्देशिका</span>
+        <h1 th:text="#{schools.title}">पडताळलेल्या शाळा</h1>
+        <p th:text="#{schools.desc}">महाराष्ट्रातील गरजू आणि पडताळलेल्या शाळा शोधा आणि त्यांच्या शैक्षणिक प्रवासात सहभागी व्हा.</p>
+      </div>
+      <div class="page-hero-icon">🏫</div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="directory-filter-bar">
+      <form method="get" action="/schools" class="filter-form">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" name="q" id="searchInput" th:value="${searchQuery}"
+                 th:placeholder="#{schools.searchPlaceholder}"
+                 placeholder="शाळेचे नाव, जिल्हा किंवा गाव शोधा...">
+        </div>
+
+        <div class="district-select-wrap">
+          <label for="districtSelect" class="filter-label">जिल्हा:</label>
+          <select name="district" id="districtSelect" onchange="this.form.submit()">
+            <option value="ALL" th:selected="${selectedDistrict == 'ALL'}" th:text="#{schools.allDistricts}">सर्व जिल्हे</option>
+            <option th:each="dist : ${districts}" th:value="${dist}" th:text="${dist}" th:selected="${selectedDistrict == dist}">पुणे</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-sm">शोधा</button>
+        <a href="/schools" class="btn btn-outline btn-sm" th:if="${(searchQuery != null && !searchQuery.isBlank()) || (selectedDistrict != null && selectedDistrict != 'ALL')}">रीसेट</a>
+      </form>
+    </div>
+
+    <!-- School Results Grid -->
+    <div class="school-grid" id="schoolsGrid">
+      <article class="school-card reveal" th:each="s : ${schools}">
+        <div class="card-top">
+          <div class="school-avatar">🏫</div>
+          <span class="status-badge">✓ <span th:text="#{common.verified}">पडताळलेले</span></span>
+        </div>
+
+        <h3 th:text="${s.name}">शाळेचे नाव</h3>
+
+        <div class="school-card-meta">
+          <span class="location-tag">📍 <strong th:text="${s.district}">जिल्हा</strong>, <span th:text="${s.villageCity}">गाव</span></span>
+          <span class="principal-tag" th:if="${s.principalName != null && !s.principalName.isBlank()}">👤 <span th:text="${s.principalName}">मुख्याध्यापक</span></span>
+        </div>
+
+        <p class="card-description" th:text="${s.description}">शाळेचे सविस्तर वर्णन...</p>
+
+        <div class="card-action-bar">
+          <a class="btn btn-soft btn-block" th:href="@{'/schools/' + ${s.id}}" th:text="#{common.viewDetails}">शाळेचा तपशील पाहा →</a>
+        </div>
+      </article>
+
+      <div class="empty-state" th:if="${schools.isEmpty()}">
+        <div class="empty-icon">🔍</div>
+        <h3 th:text="#{schools.noResults}">तुमच्या शोधाशी जुळणारी एकही शाळा सापडली नाही.</h3>
+        <p th:text="#{schools.tryDifferent}">कृपया वेगळे नाव किंवा सर्व जिल्हे निवडून पुन्हा प्रयत्न करा.</p>
+        <a href="/schools" class="btn btn-primary btn-sm mt-2" th:text="#{home.featured.viewAll}">सर्व शाळा पाहा</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script src="/js/app.js"></script>
+</body>
+</html>

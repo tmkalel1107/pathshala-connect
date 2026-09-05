@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{error.403.title})}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<main class="page error-page">
+  <div class="container text-center py-5">
+    <div class="error-visual">🚫</div>
+    <h1 class="error-code">403</h1>
+    <h2 class="error-title" th:text="#{error.403.title}">प्रवेश मर्यादित आहे</h2>
+    <p class="error-lead text-muted" th:text="#{error.403.desc}">
+      आपल्याकडे या पानावर प्रवेश करण्याचे अधिकार नाहीत. कृपया आपल्या भूमिकेनुसार नियंत्रण कक्ष वापरा.
+    </p>
+    <div class="error-actions mt-4">
+      <a href="/dashboard" class="btn btn-primary btn-lg" th:text="#{nav.dashboard}">नियंत्रण कक्ष</a>
+      <a href="/" class="btn btn-outline btn-lg" th:text="#{nav.home}">मुख्यपृष्ठ</a>
+    </div>
+  </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script src="/js/app.js"></script>
+</body>
+</html>

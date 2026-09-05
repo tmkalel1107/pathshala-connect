@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{need.title})}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<main class="page">
+  <div class="container narrow">
+    <a href="/dashboard" class="back-link" th:text="#{common.backDashboard}">← नियंत्रण कक्षाकडे परत</a>
+
+    <div class="section-heading center-heading">
+      <span class="eyebrow" th:text="#{need.badge}">शाळा प्रशासन</span>
+      <h1 th:text="#{need.title}">नवीन शैक्षणिक गरज नोंदवा</h1>
+      <p th:text="#{need.desc}">शाळेला नेमकी कोणती मदत हवी आहे ते स्पष्टपणे लिहा.</p>
+    </div>
+
+    <!-- Flash Messages -->
+    <div th:replace="~{fragments/alerts :: messages}"></div>
+
+    <section class="form-card">
+      <form method="post" action="/school/post-need" class="form-stack">
+        <div class="input-grid">
+          <label class="full-field">
+            <span th:text="#{need.titleLabel}">गरजेचे शीर्षक *</span>
+            <input type="text" name="title" required th:placeholder="${#locale.language == 'en' ? 'e.g. 10 Computer Sets for Students / Books for Library' : 'उदा. विद्यार्थ्यांसाठी १० संगणक संच / वाचनालयासाठी पुस्तके'}">
+          </label>
+
+          <label>
+            <span th:text="#{need.category}">श्रेणी *</span>
+            <select name="category" required>
+              <option value="Infrastructure" th:text="#{cat.Infrastructure}">पायाभूत सुविधा</option>
+              <option value="Classroom equipment" th:text="#{cat.Classroom_equipment}">वर्गखोली साहित्य</option>
+              <option value="Digital education" selected th:text="#{cat.Digital_education}">डिजिटल शिक्षण</option>
+              <option value="Books" th:text="#{cat.Books}">पुस्तके व ग्रंथालय</option>
+              <option value="Computers" th:text="#{cat.Computers}">संगणक प्रयोगशाळा</option>
+              <option value="Sports equipment" th:text="#{cat.Sports_equipment}">क्रीडा साहित्य</option>
+              <option value="Drinking water" th:text="#{cat.Drinking_water}">पिण्याचे पाणी</option>
+              <option value="Toilets" th:text="#{cat.Toilets}">स्वच्छतागृह</option>
+              <option value="Furniture" th:text="#{cat.Furniture}">फर्निचर व बाकडी</option>
+              <option value="Other" th:text="#{cat.Other}">इतर आवश्यकता</option>
+            </select>
+          </label>
+
+          <label>
+            <span th:text="#{need.amount}">लक्ष्य रक्कम (₹) *</span>
+            <input type="number" name="targetAmount" min="100" step="1" required placeholder="75000">
+          </label>
+
+          <label>
+            <span th:text="#{need.priority}">प्राधान्यक्रम *</span>
+            <select name="priority" required>
+              <option value="NORMAL" th:text="#{priority.NORMAL}">सामान्य</option>
+              <option value="HIGH" th:text="#{priority.HIGH}">महत्त्वाची</option>
+              <option value="URGENT" th:text="#{priority.URGENT}">तातडीची</option>
+            </select>
+          </label>
+
+          <label>
+            <span th:text="#{need.deadline}">अपेक्षित अंतिम तारीख</span>
+            <input type="date" name="deadline">
+          </label>
+
+          <label class="full-field">
+            <span th:text="#{need.descLabel}">गरजेचे सविस्तर वर्णन *</span>
+            <textarea name="description" rows="5" required
+                      th:placeholder="${#locale.language == 'en' ? 'Describe how many students will benefit and how the funds will be utilized...' : 'या गरजेमुळे किती विद्यार्थ्यांना फायदा होईल? निधीचा उपयोग कसा केला जाईल याबद्दल स्पष्ट माहिती द्या...'}"></textarea>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <a class="btn btn-outline" href="/dashboard" th:text="#{common.cancel}">रद्द करा</a>
+          <button class="btn btn-primary btn-lg" type="submit" th:text="#{need.submit}">गरज प्रकाशित करा</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script src="/js/app.js"></script>
+</body>
+</html>

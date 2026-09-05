@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{schoolDash.title})}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<main class="page">
+  <div class="container-wide">
+    <div th:replace="~{fragments/alerts :: messages}"></div>
+
+    <!-- School Header Hero -->
+    <section class="dashboard-hero reveal">
+      <div>
+        <span class="eyebrow" th:text="#{schoolDash.badge}">शाळा प्रशासन कक्ष</span>
+        <h1 th:text="${school != null ? school.name : #messages.msg('schoolDash.title')}">शाळा डॅशबोर्ड</h1>
+        <p th:if="${school != null}">
+          📍 <span th:text="${school.district}">जिल्हा</span> · <span th:text="${school.villageCity}">गाव</span>
+          <span th:if="${school.status != null}" class="status-pill ms-2"
+                th:classappend="${school.status.toLowerCase()}"
+                th:text="#{${'status.' + school.status}}">STATUS</span>
+        </p>
+      </div>
+
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/school/post-need" th:text="'＋ ' + #{schoolDash.postNeed}">＋ गरज पोस्ट करा</a>
+        <a class="btn btn-soft" href="/school/post-progress" th:text="'📸 ' + #{schoolDash.postProgress}">📸 प्रगती अहवाल द्या</a>
+        <a class="btn btn-outline" href="/school/profile" th:text="#{schoolDash.editProfile}">प्रोफाइल संपादित करा</a>
+      </div>
+    </section>
+
+    <!-- Key Metrics Grid -->
+    <div class="metric-grid">
+      <div class="metric-card reveal">
+        <span th:text="#{schoolDash.openNeeds}">सक्रिय गरजा</span>
+        <strong th:text="${openNeedsCount}">0</strong>
+        <small th:text="#{schoolDash.needsList} + ': ' + ${needs.size()}"></small>
+      </div>
+
+      <div class="metric-card reveal delay-1">
+        <span th:text="#{schoolDash.totalRaised}">मिळालेली एकूण मदत</span>
+        <strong th:text="'₹' + ${#numbers.formatDecimal(totalRaised, 1, 0)}">₹०</strong>
+        <small><span th:text="${donations.size()}">0</span> <span th:text="#{adminDash.kpiDonationCount}">नोंदी</span></small>
+      </div>
+
+      <div class="metric-card reveal delay-2">
+        <span th:text="#{schoolDash.updatesCount}">प्रगती अहवाल</span>
+        <strong th:text="${updates.size()}">0</strong>
+        <small th:text="#{trans.title}">पारदर्शक परिणाम अहवाल</small>
+      </div>
+    </div>
+
+    <!-- Posted Needs Table -->
+    <section class="panel-card mt-3 reveal">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow" th:text="#{adminDash.tabNeeds}">गरजा व्यवस्थापन</span>
+          <h2 th:text="#{schoolDash.needsList}">नोंदवलेल्या गरजा</h2>
+        </div>
+        <a class="btn btn-primary btn-sm" href="/school/post-need" th:text="'＋ ' + #{schoolDash.postNeed}">＋ नवीन गरज</a>
+      </div>
+
+      <div th:if="${needs.isEmpty()}" class="empty-state small-empty">
+        <div class="empty-icon">📝</div>
+        <h3 th:text="#{details.noNeeds}">अद्याप कोणतीही गरज नोंदवलेली नाही.</h3>
+        <p th:text="#{need.desc}">शाळेला आवश्यक असलेल्या गरजा पोस्ट करा.</p>
+        <a class="btn btn-primary btn-sm mt-2" href="/school/post-need" th:text="#{schoolDash.postNeed}">गरज पोस्ट करा</a>
+      </div>
+
+      <div class="table-responsive" th:if="${!needs.isEmpty()}">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th th:text="#{need.titleLabel}">शीर्षक</th>
+              <th th:text="#{adminDash.tblCategory}">श्रेणी</th>
+              <th th:text="#{adminDash.tblPriority}">प्राधान्य</th>
+              <th th:text="#{adminDash.tblTarget}">लक्ष्य रक्कम</th>
+              <th th:text="#{adminDash.tblProgress}">प्रगती</th>
+              <th th:text="#{adminDash.tblStatus}">स्थिती</th>
+              <th th:text="#{adminDash.tblActions}">कृती</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="n : ${needs}">
+              <td>
+                <strong th:text="${n.title}">शीर्षक</strong>
+                <small class="d-block text-muted" th:text="${#strings.abbreviate(n.description, 60)}">वर्णन</small>
+              </td>
+              <td><span class="category-tag" th:text="#{${'cat.' + n.category}}">Digital</span></td>
+              <td><span class="priority-pill" th:classappend="${n.priority}" th:text="#{${'priority.' + n.priority}}">NORMAL</span></td>
+              <td>
+                <strong>₹<span th:text="${#numbers.formatDecimal(n.receivedAmount, 1, 0)}">0</span></strong> /
+                ₹<span th:text="${#numbers.formatDecimal(n.targetAmount, 1, 0)}">0</span>
+              </td>
+              <td>
+                <div class="mini-progress-wrap">
+                  <div class="progress-bar tiny"><i th:style="'width:' + ${n.percentRaised} + '%'"></i></div>
+                  <small><span th:text="${n.percentRaised}">0</span>%</small>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill" th:classappend="${n.status == 'OPEN' ? 'verified' : (n.status == 'FUNDED' ? 'funded' : 'rejected')}" th:text="#{${'status.' + n.status}}">OPEN</span>
+              </td>
+              <td>
+                <form method="post" th:action="@{'/school/need/' + ${n.id} + '/toggle'}" style="display:inline">
+                  <button type="submit" class="btn btn-outline btn-xs"
+                          th:text="${n.status == 'OPEN' ? #messages.msg('adminDash.toggleClose') : #messages.msg('adminDash.toggleOpen')}">
+                    Toggle
+                  </button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Received Donations Table -->
+    <section class="panel-card mt-3 reveal">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow" th:text="#{donorDash.donationHistory}">मदत नोंदी</span>
+          <h2 th:text="#{schoolDash.donationsList}">मिळालेल्या देणग्या</h2>
+        </div>
+        <span class="amount-badge" th:text="#{schoolDash.totalRaised} + ': ₹' + ${#numbers.formatDecimal(totalRaised, 1, 0)}">एकूण: ₹०</span>
+      </div>
+
+      <div th:if="${donations.isEmpty()}" class="empty-state small-empty">
+        <div class="empty-icon">🤝</div>
+        <h3 th:text="#{donorDash.noDonations}">अद्याप कोणतीही देणगी मिळालेली नाही.</h3>
+      </div>
+
+      <div class="table-responsive" th:if="${!donations.isEmpty()}">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th th:text="#{adminDash.tblDate}">दिनांक</th>
+              <th th:text="#{schoolDash.donorName}">देणगीदार</th>
+              <th th:text="#{adminDash.tabNeeds}">संबंधित गरज</th>
+              <th th:text="#{schoolDash.amount}">रक्कम</th>
+              <th th:text="#{donate.message}">संदेश</th>
+              <th th:text="#{adminDash.tblTxnRef}">नोंद क्रमांक</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="d : ${donations}">
+              <td><span th:text="${#temporals.format(d.donationDate, 'dd/MM/yyyy HH:mm')}">तारिख</span></td>
+              <td>
+                <strong><span th:text="${d.donor != null ? d.donor.fullName : 'Anonymous'}">नाव</span></strong>
+                <small class="d-block text-muted" th:text="${d.donor != null ? d.donor.organization : ''}">संस्था</small>
+              </td>
+              <td><span th:text="${d.need != null ? d.need.title : '-'}">गरज</span></td>
+              <td><strong class="text-success" th:text="'₹' + ${#numbers.formatDecimal(d.amount, 1, 0)}">₹०</strong></td>
+              <td><span class="text-muted" th:text="${d.message != null && !d.message.isBlank() ? d.message : '-'}">-</span></td>
+              <td><code><span th:text="${d.transactionRef}">TXN-123</span></code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Progress Updates Stream -->
+    <section class="panel-card mt-3 reveal">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow" th:text="#{prog.badge}">पारदर्शकता अहवाल</span>
+          <h2 th:text="#{prog.title}">प्रगती अहवाल</h2>
+        </div>
+        <a class="btn btn-soft btn-sm" href="/school/post-progress" th:text="'＋ ' + #{schoolDash.postProgress}">＋ नवीन अपडेट</a>
+      </div>
+
+      <div th:if="${updates.isEmpty()}" class="empty-state small-empty">
+        <div class="empty-icon">📈</div>
+        <h3 th:text="#{details.noProgress}">कोणताही प्रगती अहवाल नोंदवलेला नाही.</h3>
+      </div>
+
+      <div class="updates-grid" th:if="${!updates.isEmpty()}">
+        <div class="update-card" th:each="u : ${updates}">
+          <div class="update-card-top">
+            <h4 th:text="${u.title}">अपडेट शीर्षक</h4>
+            <span class="percent-pill" th:text="${u.progressPercent} + '%'">०%</span>
+          </div>
+          <p class="update-desc" th:text="${u.description}">वर्णन...</p>
+          <div class="update-img-box" th:if="${u.imageUrl != null && !u.imageUrl.isBlank()}">
+            <img th:src="${u.imageUrl}" alt="Update Photo" onerror="this.style.display='none'">
+          </div>
+          <div class="update-footer">
+            <small class="text-muted" th:text="${#temporals.format(u.createdAt, 'dd/MM/yyyy')}">दिनांक</small>
+            <span class="text-muted small" th:if="${u.need != null}">📌 <span th:text="${u.need.title}">गरज</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script src="/js/app.js"></script>
+</body>
+</html>

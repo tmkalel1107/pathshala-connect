@@ -1,0 +1,23 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="messages" class="alerts-container">
+  <div th:if="${error}" class="alert alert-error reveal">
+    <span class="alert-icon">⚠️</span>
+    <div class="alert-content" th:text="${error}">त्रुटी संदेश</div>
+  </div>
+  <div th:if="${errorKey}" class="alert alert-error reveal">
+    <span class="alert-icon">⚠️</span>
+    <div class="alert-content" th:text="#{${errorKey}}">त्रुटी संदेश</div>
+  </div>
+  <div th:if="${success}" class="alert alert-success reveal">
+    <span class="alert-icon">✅</span>
+    <div class="alert-content" th:text="${success}">यशस्वी संदेश</div>
+  </div>
+  <div th:if="${successKey}" class="alert alert-success reveal">
+    <span class="alert-icon">✅</span>
+    <div class="alert-content" th:text="#{${successKey}}">यशस्वी संदेश</div>
+  </div>
+</div>
+</body>
+</html>

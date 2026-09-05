@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{donate.title})}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<main class="page">
+  <div class="container narrow">
+    <a th:href="@{'/schools/' + ${school.id}}" class="back-link" th:text="'← ' + #{common.backSchools}">← शाळांच्या यादीकडे</a>
+
+    <div class="section-heading center-heading">
+      <span class="eyebrow" th:text="#{donate.badge}">योगदान</span>
+      <h1 th:text="#{donate.title}">या शैक्षणिक गरजेला हातभार लावा</h1>
+      <p th:text="#{donate.desc}">तुमचे योगदान थेट या शाळेतील विद्यार्थ्यांच्या शिक्षणासाठी वापरले जाईल.</p>
+    </div>
+
+    <!-- Flash Messages -->
+    <div th:replace="~{fragments/alerts :: messages}"></div>
+
+    <div class="donate-grid">
+      <!-- Left Column: Need & School Summary -->
+      <section class="need-summary reveal">
+        <span class="category-tag" th:text="#{${'cat.' + need.category}}">श्रेणी</span>
+        <h2 th:text="${need.title}">गरजेचे शीर्षक</h2>
+        <p class="summary-desc" th:text="${need.description}">वर्णन...</p>
+
+        <div class="school-mini-profile">
+          <span class="school-icon-inline">🏫</span>
+          <div>
+            <strong th:text="${school.name}">शाळेचे नाव</strong>
+            <small class="d-block text-muted">📍 <span th:text="${school.district}">जिल्हा</span>, <span th:text="${school.villageCity}">गाव</span></small>
+          </div>
+        </div>
+
+        <div class="progress-meta mt-3">
+          <span><span th:text="#{details.raised}">जमा</span>: <strong th:text="'₹' + ${#numbers.formatDecimal(need.receivedAmount, 1, 0)}">₹०</strong></span>
+          <span><span th:text="#{details.goal}">लक्ष्य</span>: <strong th:text="'₹' + ${#numbers.formatDecimal(need.targetAmount, 1, 0)}">₹०</strong></span>
+        </div>
+        <div class="progress-bar">
+          <i th:style="'width:' + ${need.percentRaised} + '%'"></i>
+        </div>
+        <div class="progress-footer-info">
+          <small><span th:text="${need.percentRaised}">0</span>%</small>
+        </div>
+      </section>
+
+      <!-- Right Column: Contribution Form -->
+      <section class="form-card reveal delay-1">
+        <div class="form-heading">
+          <span class="form-icon">🤝</span>
+          <div>
+            <h3 class="m-0" th:text="#{donate.badge}">योगदान</h3>
+            <p class="m-0 text-muted small" th:text="#{donate.desc}">रक्कम व ऐच्छिक संदेश निवडा.</p>
+          </div>
+        </div>
+
+        <form method="post" th:action="@{'/donate/' + ${need.id}}" class="form-stack" id="donationForm">
+          <!-- Preset Amount Chips -->
+          <div class="amount-presets">
+            <button type="button" class="preset-btn" onclick="setAmount(500)">₹५००</button>
+            <button type="button" class="preset-btn" onclick="setAmount(1000)">₹१,०००</button>
+            <button type="button" class="preset-btn" onclick="setAmount(2500)">₹२,५००</button>
+            <button type="button" class="preset-btn" onclick="setAmount(5000)">₹५,०००</button>
+          </div>
+
+          <label>
+            <span th:text="#{donate.amount}">योगदान रक्कम (₹) *</span>
+            <input type="number" name="amount" id="donationAmount" min="10" step="1" required placeholder="1000">
+          </label>
+
+          <label>
+            <span th:text="#{donate.paymentMethod}">पद्धत निवडा</span>
+            <select name="paymentMethod">
+              <option value="DEMO_UPI" th:text="${#locale.language == 'en' ? '📱 UPI / QR Code' : '📱 युपीआय / क्यूआर कोड'}">📱 UPI</option>
+              <option value="DEMO_NETBANKING" th:text="${#locale.language == 'en' ? '🏦 Net Banking' : '🏦 नेट बँकिंग'}">🏦 Net Banking</option>
+              <option value="DEMO_CARD" th:text="${#locale.language == 'en' ? '💳 Debit / Credit Card' : '💳 डेबिट किंवा क्रेडिट कार्ड'}">💳 Card</option>
+            </select>
+          </label>
+
+          <label>
+            <span th:text="#{donate.message}">शाळेसाठी संदेश / शुभेच्छा (ऐच्छिक)</span>
+            <textarea name="message" rows="3" th:placeholder="${#locale.language == 'en' ? 'Your message of support or encouragement for the students...' : 'विद्यार्थ्यांसाठी तुमचे प्रोत्साहनपर शब्द किंवा शाळेसाठी संदेश...'}"></textarea>
+          </label>
+
+          <button class="btn btn-primary btn-lg btn-block" type="submit" th:text="#{donate.submit}">
+            योगदान निश्चित करा
+          </button>
+        </form>
+
+        <div class="demo-note">
+          <span>ℹ️</span>
+          <div>
+            <b th:text="#{login.demo}">प्रकल्प नोंद</b>:
+            <p class="m-0" th:text="#{donate.demoNotice}">हा शैक्षणिक प्रकल्प असल्याने प्रत्यक्ष पैशांऐवजी सुरक्षित चाचणी व्यवहार नोंदवला जाईल.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script src="/js/app.js"></script>
+<script>
+function setAmount(val) {
+  const input = document.getElementById('donationAmount');
+  if (input) {
+    input.value = val;
+    input.focus();
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{schoolDash.editProfile})}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<main class="page">
+  <div class="container narrow">
+    <a href="/dashboard" class="back-link" th:text="#{common.backDashboard}">← नियंत्रण कक्षाकडे परत</a>
+
+    <div class="section-heading center-heading">
+      <span class="eyebrow" th:text="#{schoolDash.badge}">शाळा प्रशासन कक्ष</span>
+      <h1 th:text="#{schoolDash.editProfile}">शाळा प्रोफाइल संपादन</h1>
+      <p th:text="#{reg.schoolDesc}">शाळेची माहिती अद्ययावत ठेवा जेणेकरून देणगीदारांना विश्वासार्ह माहिती मिळेल.</p>
+    </div>
+
+    <!-- Flash Messages -->
+    <div th:replace="~{fragments/alerts :: messages}"></div>
+
+    <section class="form-card">
+      <form method="post" action="/school/profile" class="form-stack">
+        <div class="input-grid">
+          <label class="full-field">
+            <span th:text="#{reg.schoolName}">शाळेचे नाव *</span>
+            <input type="text" name="name" th:value="${school.name}" required th:placeholder="${#locale.language == 'en' ? 'e.g. Zilla Parishad School' : 'उदा. जिल्हा परिषद प्राथमिक शाळा'}">
+          </label>
+
+          <label>
+            <span th:text="#{reg.principalName}">मुख्याध्यापकांचे नाव *</span>
+            <input type="text" name="principalName" th:value="${school.principalName}" required th:placeholder="${#locale.language == 'en' ? 'e.g. S. B. Patil' : 'उदा. श्री. एस. बी. पाटील'}">
+          </label>
+
+          <label>
+            <span th:text="#{reg.phone}">संपर्क मोबाईल क्रमांक *</span>
+            <input type="tel" name="contact" th:value="${school.contact}" pattern="[0-9]{10}" maxlength="10" required th:placeholder="${#locale.language == 'en' ? '10-digit mobile number' : '१० अंकी मोबाईल क्रमांक'}">
+          </label>
+
+          <label>
+            <span th:text="#{reg.district}">जिल्हा *</span>
+            <input type="text" name="district" th:value="${school.district}" required th:placeholder="${#locale.language == 'en' ? 'e.g. Pune' : 'उदा. पुणे'}">
+          </label>
+
+          <label>
+            <span th:text="#{reg.villageCity}">गाव किंवा शहर *</span>
+            <input type="text" name="villageCity" th:value="${school.villageCity}" th:placeholder="${#locale.language == 'en' ? 'e.g. Mulshi' : 'उदा. मुळशी'}">
+          </label>
+
+          <label>
+            <span th:text="#{reg.pincode}">पिनकोड *</span>
+            <input type="text" name="pincode" th:value="${school.pincode}" pattern="[0-9]{6}" maxlength="6" th:placeholder="${#locale.language == 'en' ? 'e.g. 412108' : 'उदा. ४१२१०८'}">
+          </label>
+
+          <label class="full-field">
+            <span th:text="#{reg.address}">शाळेचा पूर्ण पत्ता *</span>
+            <textarea name="address" rows="3" required th:placeholder="${#locale.language == 'en' ? 'Complete postal address of the school...' : 'शाळेचा पूर्ण पोस्टल पत्ता...'}" th:text="${school.address}"></textarea>
+          </label>
+
+          <label class="full-field">
+            <span th:text="#{reg.schoolDescLabel}">शाळेचे सविस्तर वर्णन</span>
+            <textarea name="description" rows="4" th:placeholder="${#locale.language == 'en' ? 'School overview and background...' : 'शाळेची पार्श्वभूमी व उद्दिष्टे...'}" th:text="${school.description}"></textarea>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <a class="btn btn-outline" href="/dashboard" th:text="#{common.cancel}">रद्द करा</a>
+          <button class="btn btn-primary btn-lg" type="submit" th:text="#{common.save}">जतन करा</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script src="/js/app.js"></script>
+</body>
+</html>

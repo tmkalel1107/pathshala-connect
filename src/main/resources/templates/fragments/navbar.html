@@ -1,0 +1,52 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="nav" class="site-nav">
+  <div class="nav-inner container-wide">
+    <!-- Brand Logo -->
+    <a class="brand" href="/">
+      <span class="brand-mark">📚</span>
+      <div class="brand-text">
+        <span class="brand-name"><strong th:text="#{nav.brand}">पाठशाळा कनेक्ट</strong></span>
+        <small class="brand-tagline" th:text="#{nav.brand.sub}">शाळांना सक्षम करणारे, समाजाला जोडणारे व्यासपीठ</small>
+      </div>
+    </a>
+
+    <!-- Mobile Hamburger Toggle -->
+    <button class="mobile-menu" type="button" aria-label="Menu" onclick="toggleMenu()">☰</button>
+
+    <!-- Main Navigation Links -->
+    <nav id="mainNav" class="main-nav">
+      <a href="/" th:text="#{nav.home}">मुख्यपृष्ठ</a>
+      <a href="/schools" th:text="#{nav.schools}">शाळा निर्देशिका</a>
+      <a href="/transparency" th:text="#{nav.transparency}">पारदर्शकता</a>
+      <a href="/#about" th:text="#{nav.about}">आमच्याबद्दल</a>
+      <a href="/dashboard" th:if="${session.uid != null}" class="nav-highlight" th:text="#{nav.dashboard}">डॅशबोर्ड</a>
+      <a href="/school/profile" th:if="${session.role == 'SCHOOL'}" th:text="#{nav.profile}">प्रोफाइल</a>
+    </nav>
+
+    <!-- Right Side Actions & Language Switcher -->
+    <div class="nav-actions">
+      <!-- Language Switcher: English when in Marathi, मराठी when in English -->
+      <div class="lang-switch-wrap">
+        <button id="langToggleBtn" class="lang-switch-btn" type="button" onclick="switchLanguage()" title="भाषा बदला / Change Language">
+          <span class="lang-icon">🌐</span>
+          <span id="langCurrentLabel" th:text="${#locale.language == 'en' ? 'मराठी' : 'English'}">English</span>
+        </button>
+      </div>
+
+      <!-- Logged Out Actions -->
+      <a class="btn btn-outline btn-sm" href="/login" th:if="${session.uid == null}" th:text="#{nav.login}">लॉगिन</a>
+      <a class="btn btn-primary btn-sm" href="/register" th:if="${session.uid == null}" th:text="#{nav.register}">नोंदणी</a>
+
+      <!-- Logged In Actions -->
+      <div class="user-pill" th:if="${session.uid != null}">
+        <span class="user-role-badge" th:text="#{${'role.' + session.role}}">USER</span>
+        <span class="user-name-text" th:text="${session.name}">नाव</span>
+      </div>
+      <a class="btn btn-outline btn-sm btn-logout" href="/logout" th:if="${session.uid != null}" th:text="#{nav.logout}">बाहेर पडा</a>
+    </div>
+  </div>
+</header>
+</body>
+</html>

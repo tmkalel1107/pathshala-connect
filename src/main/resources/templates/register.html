@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{reg.title})}"></head>
+<body class="auth-page register-page">
+<div class="auth-shell">
+  <!-- Top Brand Bar -->
+  <div class="auth-brandbar">
+    <a class="brand" href="/">
+      <span class="brand-mark">📚</span>
+      <div class="brand-text">
+        <span class="brand-name"><strong th:text="#{nav.brand}">पाठशाळा कनेक्ट</strong></span>
+        <small class="brand-tagline" th:text="#{nav.brand.sub}">शाळांना सक्षम करणारे, समाजाला जोडणारे व्यासपीठ</small>
+      </div>
+    </a>
+    <div class="auth-top-actions">
+      <button class="lang-switch-btn" type="button" onclick="switchLanguage()">
+        <span>🌐</span> <span id="langCurrentLabel" th:text="${#locale.language == 'en' ? 'मराठी' : 'English'}">English</span>
+      </button>
+      <a href="/login" class="text-link small" th:text="'← ' + #{nav.login}">← लॉगिन</a>
+    </div>
+  </div>
+
+  <section class="register-header">
+    <span class="eyebrow" th:text="#{reg.badge}">समुदायात सहभागी व्हा</span>
+    <h1 th:text="#{reg.title}">नवीन खाते तयार करा</h1>
+    <p class="register-subtitle" th:text="#{reg.question}">तुम्ही कोणत्या प्रकारे सहभागी होऊ इच्छिता?</p>
+  </section>
+
+  <!-- Clean 2-Role Selector: School and Donor Only (Admin is by invitation/dashboard only) -->
+  <section class="role-selector">
+    <label class="role-option" data-role="SCHOOL" onclick="selectRole('SCHOOL')">
+      <input type="radio" name="rolePicker" value="SCHOOL" id="roleChoiceSchool">
+      <span class="role-icon">🏫</span>
+      <span class="role-copy">
+        <strong th:text="#{reg.schoolRole}">शाळा / मुख्याध्यापक</strong>
+        <small th:text="#{reg.schoolRoleDesc}">शाळेची माहिती, शैक्षणिक गरजा आणि प्रगती अहवाल व्यवस्थापित करा.</small>
+      </span>
+      <span class="radio-dot"></span>
+    </label>
+
+    <label class="role-option" data-role="DONOR" onclick="selectRole('DONOR')">
+      <input type="radio" name="rolePicker" value="DONOR" id="roleChoiceDonor">
+      <span class="role-icon">🤝</span>
+      <span class="role-copy">
+        <strong th:text="#{reg.donorRole}">देणगीदार / मदतकर्ता</strong>
+        <small th:text="#{reg.donorRoleDesc}">गरजू शाळांना सहकार्य करा आणि मदतीचा प्रत्यक्ष परिणाम पाहा.</small>
+      </span>
+      <span class="radio-dot"></span>
+    </label>
+  </section>
+
+  <!-- Registration Card Form -->
+  <section class="form-card register-card">
+    <div th:replace="~{fragments/alerts :: messages}"></div>
+
+    <div class="role-title-indicator">
+      <span id="roleBadgeIndicator" class="role-indicator-badge">🏫 <span th:text="#{reg.schoolRole}">शाळा</span></span>
+    </div>
+
+    <form method="post" action="/register" class="form-stack" id="registrationForm" onsubmit="return validateForm()">
+      <!-- Hidden Account Type input -->
+      <input type="hidden" name="role" id="selectedRole" value="SCHOOL">
+
+      <!-- Section 1: Basic Contact Information -->
+      <div class="form-section">
+        <div class="section-label">
+          <span>01</span>
+          <div>
+            <h3 th:text="#{reg.personalTitle}">मूलभूत संपर्क माहिती</h3>
+            <p th:text="#{reg.personalDesc}">आपले नाव, ई-मेल आणि मोबाईल क्रमांक भरा.</p>
+          </div>
+        </div>
+
+        <div class="input-grid">
+          <label>
+            <span th:text="#{reg.fullName}">पूर्ण नाव *</span>
+            <input type="text" name="fullName" autocomplete="name" required th:placeholder="${#locale.language == 'en' ? 'e.g. Rahul Sharma' : 'उदा. राहुल शर्मा'}">
+          </label>
+
+          <label>
+            <span th:text="#{reg.email}">ई-मेल पत्ता *</span>
+            <input type="email" name="email" autocomplete="email" required placeholder="name@example.com">
+          </label>
+
+          <label>
+            <span th:text="#{reg.phone}">१० अंकी मोबाईल क्रमांक *</span>
+            <input type="tel" name="phone" id="phone" autocomplete="tel" pattern="[0-9]{10}" maxlength="10" required th:placeholder="${#locale.language == 'en' ? '10-digit mobile number' : '१० अंकी मोबाईल क्रमांक'}">
+          </label>
+
+          <label id="orgField">
+            <span th:text="#{reg.organization}">संस्था किंवा कंपनी (ऐच्छिक)</span>
+            <input type="text" name="organization" id="organization" th:placeholder="${#locale.language == 'en' ? 'e.g. Tata Trust / Individual' : 'उदा. टाटा ट्रस्ट / खाजगी व्यक्ती'}">
+          </label>
+        </div>
+      </div>
+
+      <!-- Section 2: School Information (Dynamically shown only when School is selected) -->
+      <div class="form-section school-section" id="schoolFieldsSection">
+        <div class="section-label">
+          <span>02</span>
+          <div>
+            <h3 th:text="#{reg.schoolTitle}">शाळेची संपूर्ण माहिती</h3>
+            <p th:text="#{reg.schoolDesc}">ही माहिती शाळेच्या सार्वजनिक पानावर दिसेल.</p>
+          </div>
+        </div>
+
+        <div class="input-grid">
+          <label>
+            <span th:text="#{reg.schoolName}">शाळेचे नाव *</span>
+            <input type="text" name="schoolName" id="schoolName" th:placeholder="${#locale.language == 'en' ? 'e.g. Zilla Parishad Primary School' : 'उदा. जिल्हा परिषद प्राथमिक शाळा'}">
+          </label>
+
+          <label>
+            <span th:text="#{reg.principalName}">मुख्याध्यापकांचे नाव *</span>
+            <input type="text" name="principalName" id="principalName" th:placeholder="${#locale.language == 'en' ? 'e.g. S. B. Patil' : 'उदा. श्री. एस. बी. पाटील'}">
+          </label>
+
+          <label>
+            <span th:text="#{reg.district}">जिल्हा *</span>
+            <input type="text" name="district" id="district" th:placeholder="${#locale.language == 'en' ? 'e.g. Pune, Satara, Nashik' : 'उदा. पुणे, सातारा, नाशिक'}">
+          </label>
+
+          <label>
+            <span th:text="#{reg.villageCity}">गाव किंवा शहर *</span>
+            <input type="text" name="villageCity" id="villageCity" th:placeholder="${#locale.language == 'en' ? 'e.g. Mulshi' : 'उदा. मुळशी'}">
+          </label>
+
+          <label>
+            <span th:text="#{reg.pincode}">पिनकोड *</span>
+            <input type="text" name="pincode" id="pincode" pattern="[0-9]{6}" maxlength="6" th:placeholder="${#locale.language == 'en' ? 'e.g. 412108' : 'उदा. ४१२१०८'}">
+          </label>
+
+          <label class="full-field">
+            <span th:text="#{reg.address}">शाळेचा पूर्ण पत्ता *</span>
+            <textarea name="address" id="address" rows="2" th:placeholder="${#locale.language == 'en' ? 'Complete postal address of the school' : 'शाळेचा संपूर्ण पोस्टल पत्ता'}"></textarea>
+          </label>
+
+          <label class="full-field">
+            <span th:text="#{reg.schoolDescLabel}">शाळेचे वर्णन व उद्दिष्टे</span>
+            <textarea name="schoolDescription" rows="3" th:placeholder="${#locale.language == 'en' ? 'Tell us about the school, number of students, and primary educational goals...' : 'शाळेची स्थापना, विद्यार्थ्यांची संख्या आणि मुख्य शैक्षणिक उद्दिष्टे याबद्दल थोडी माहिती द्या...'}"></textarea>
+          </label>
+        </div>
+
+        <div class="notice">
+          <span>🛡️</span>
+          <div>
+            <b th:text="#{home.step2.title}">प्रशासन पडताळणी</b>
+            <small th:text="#{reg.verifyNotice}">नोंदणीनंतर मुख्य प्रशासक शाळेची पडताळणी करतील. पडताळणी पूर्ण झाल्यावरच शाळा सार्वजनिक निर्देशिकेत दिसेल.</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Account Security -->
+      <div class="form-section">
+        <div class="section-label">
+          <span>03</span>
+          <div>
+            <h3 th:text="#{reg.securityTitle}">खाते सुरक्षा</h3>
+            <p th:text="#{reg.securityDesc}">किमान ६ अक्षरांचा सुरक्षित पासवर्ड तयार करा.</p>
+          </div>
+        </div>
+
+        <div class="input-grid">
+          <label>
+            <span th:text="#{reg.password}">पासवर्ड *</span>
+            <div class="password-wrap">
+              <input id="p1" type="password" name="password" minlength="6" autocomplete="new-password" required th:placeholder="${#locale.language == 'en' ? 'Minimum 6 characters' : 'किमान ६ अक्षरे'}">
+              <button type="button" class="password-toggle" onclick="togglePassword('p1', this)" th:text="#{login.show}">दाखवा</button>
+            </div>
+          </label>
+
+          <label>
+            <span th:text="#{reg.confirmPassword}">पासवर्डची खात्री करा *</span>
+            <div class="password-wrap">
+              <input id="p2" type="password" name="confirmPassword" minlength="6" autocomplete="new-password" required th:placeholder="${#locale.language == 'en' ? 'Re-enter password' : 'पासवर्डची खात्री करा'}">
+              <button type="button" class="password-toggle" onclick="togglePassword('p2', this)" th:text="#{login.show}">दाखवा</button>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Terms & Submit -->
+      <label class="check-label agreement">
+        <input type="checkbox" required>
+        <span th:text="#{reg.agree}">मी दिलेली माहिती सत्य आहे आणि मी पाठशाळा कनेक्टच्या नियमांना बांधील आहे.</span>
+      </label>
+
+      <button class="btn btn-primary btn-lg btn-block" type="submit" id="submitBtn">
+        <span id="submitBtnText" th:text="#{reg.submitSchool}">शाळा म्हणून खाते तयार करा</span>
+      </button>
+    </form>
+
+    <div class="auth-bottom">
+      <span th:text="#{reg.existing}">आधीच खाते आहे?</span>
+      <a href="/login" class="text-link" th:text="#{nav.login}">प्रवेश करा →</a>
+    </div>
+  </section>
+</div>
+
+<script src="/js/app.js"></script>
+<script th:inline="javascript">
+const isEnglish = /*[[${#locale.language == 'en'}]]*/ false;
+
+const schoolBadgeText = isEnglish ? '🏫 Register as School' : '🏫 शाळा म्हणून नोंदणी करा';
+const donorBadgeText = isEnglish ? '🤝 Register as Donor' : '🤝 देणगीदार म्हणून नोंदणी करा';
+const schoolSubmitText = isEnglish ? 'Create School Account' : 'शाळा म्हणून खाते तयार करा';
+const donorSubmitText = isEnglish ? 'Create Donor Account' : 'देणगीदार म्हणून खाते तयार करा';
+const pwMismatchAlert = isEnglish ? 'Passwords do not match! Please enter the same password.' : 'पासवर्ड जुळत नाहीत! कृपया दोन्ही ठिकाणी समान पासवर्ड टाका.';
+const phoneAlert = isEnglish ? 'Please enter a valid 10-digit mobile number.' : 'कृपया वैध १०-अंकी मोबाईल क्रमांक भरा.';
+
+function selectRole(role) {
+  document.getElementById('selectedRole').value = role;
+
+  const schoolSection = document.getElementById('schoolFieldsSection');
+  const badge = document.getElementById('roleBadgeIndicator');
+  const submitText = document.getElementById('submitBtnText');
+
+  const schoolRequiredIds = ['schoolName', 'district', 'address'];
+
+  if (role === 'SCHOOL') {
+    schoolSection.style.display = 'block';
+    schoolRequiredIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.required = true;
+    });
+    badge.textContent = schoolBadgeText;
+    badge.className = 'role-indicator-badge school-badge';
+    submitText.textContent = schoolSubmitText;
+  } else {
+    schoolSection.style.display = 'none';
+    schoolRequiredIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.required = false;
+    });
+    badge.textContent = donorBadgeText;
+    badge.className = 'role-indicator-badge donor-badge';
+    submitText.textContent = donorSubmitText;
+  }
+
+  document.querySelectorAll('.role-option').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('data-role') === role);
+  });
+}
+
+function validateForm() {
+  const p1 = document.getElementById('p1').value;
+  const p2 = document.getElementById('p2').value;
+  if (p1 !== p2) {
+    alert(pwMismatchAlert);
+    return false;
+  }
+  const phone = document.getElementById('phone').value;
+  if (!/^\d{10}$/.test(phone)) {
+    alert(phoneAlert);
+    return false;
+  }
+  return true;
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const paramRole = urlParams.get('role');
+if (paramRole && paramRole.toUpperCase() === 'DONOR') {
+  selectRole('DONOR');
+} else {
+  selectRole('SCHOOL');
+}
+</script>
+</body>
+</html>

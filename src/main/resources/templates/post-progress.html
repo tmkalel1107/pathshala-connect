@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{prog.title})}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<main class="page">
+  <div class="container narrow">
+    <a href="/dashboard" class="back-link" th:text="#{common.backDashboard}">← नियंत्रण कक्षाकडे परत</a>
+
+    <div class="section-heading center-heading">
+      <span class="eyebrow" th:text="#{prog.badge}">पारदर्शकता</span>
+      <h1 th:text="#{prog.title}">प्रगती अहवाल पोस्ट करा</h1>
+      <p th:text="#{prog.desc}">देणगीदारांना शैक्षणिक कामाची खरी व विश्वासार्ह माहिती द्या.</p>
+    </div>
+
+    <!-- Flash Messages -->
+    <div th:replace="~{fragments/alerts :: messages}"></div>
+
+    <section class="form-card">
+      <form method="post" action="/school/post-progress" class="form-stack">
+        <div class="input-grid">
+          <label class="full-field">
+            <span th:text="#{prog.titleLabel}">अहवालाचे शीर्षक *</span>
+            <input type="text" name="title" required th:placeholder="${#locale.language == 'en' ? 'e.g. New Computer Lab Wiring Completed / Library Books Arrived' : 'उदा. नवीन संगणक लॅबचे वायरिंग पूर्ण / ग्रंथालयात पुस्तके दाखल'}">
+          </label>
+
+          <label>
+            <span th:text="#{prog.percent}">काम पूर्णत्व (%) *</span>
+            <input type="number" name="progressPercent" min="0" max="100" required placeholder="75">
+          </label>
+
+          <label>
+            <span th:text="#{prog.relatedNeed}">संबंधित शैक्षणिक गरज</span>
+            <select name="needId">
+              <option value="" th:text="${#locale.language == 'en' ? '-- General Progress Report --' : '-- सर्वसाधारण प्रगती अहवाल --'}">-- प्रगती अहवाल --</option>
+              <option th:each="n : ${needs}" th:value="${n.id}" th:text="${n.title}">गरज</option>
+            </select>
+          </label>
+
+          <label class="full-field">
+            <span th:text="#{prog.photo}">फोटो लिंक (URL)</span>
+            <input type="url" name="imageUrl" placeholder="https://images.unsplash.com/...">
+          </label>
+
+          <label class="full-field">
+            <span th:text="#{prog.descLabel}">कामाचा सविस्तर तपशील *</span>
+            <textarea name="description" rows="5" required
+                      th:placeholder="${#locale.language == 'en' ? 'Describe the work completed so far, student feedback, and next steps...' : 'आत्तापर्यंत किती काम पूर्ण झाले आहे? विद्यार्थ्यांचा प्रतिसाद कसा आहे ते सविस्तर लिहा...'}"></textarea>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <a class="btn btn-outline" href="/dashboard" th:text="#{common.cancel}">रद्द करा</a>
+          <button class="btn btn-primary btn-lg" type="submit" th:text="#{prog.submit}">अहवाल प्रकाशित करा</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script src="/js/app.js"></script>
+</body>
+</html>

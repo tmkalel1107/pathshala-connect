@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(${school.name} + ' | ' + #{nav.brand})}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<main class="page">
+  <div class="container-wide">
+    <a href="/schools" class="back-link" th:text="#{common.backSchools}">← शाळांच्या यादीकडे</a>
+
+    <!-- School Hero Banner Card -->
+    <section class="school-hero-card reveal">
+      <div class="school-hero-content">
+        <div class="school-hero-top">
+          <span class="status-badge" th:if="${school.status == 'VERIFIED'}">✓ <span th:text="#{common.verifiedSchool}">पडताळलेली शाळा</span></span>
+          <span class="status-badge pending" th:if="${school.status == 'PENDING'}">⏳ <span th:text="#{common.pending}">प्रलंबित</span></span>
+        </div>
+
+        <h1 class="school-hero-title" th:text="${school.name}">शाळेचे नाव</h1>
+        <p class="school-location-line">
+          📍 <strong th:text="${school.district}">जिल्हा</strong>, <span th:text="${school.villageCity}">गाव</span>
+          <span th:if="${school.pincode != null && !school.pincode.isBlank()}" th:text="' - ' + ${school.pincode}"></span>
+        </p>
+
+        <p class="school-full-desc" th:text="${school.description}">शाळेचे वर्णन...</p>
+
+        <div class="school-contact-grid">
+          <div class="contact-pill" th:if="${school.principalName != null && !school.principalName.isBlank()}">
+            <span class="pill-icon">👤</span>
+            <div>
+              <small th:text="#{details.principal}">मुख्याध्यापक</small>
+              <strong th:text="${school.principalName}">नाव</strong>
+            </div>
+          </div>
+
+          <div class="contact-pill" th:if="${school.contact != null && !school.contact.isBlank()}">
+            <span class="pill-icon">📞</span>
+            <div>
+              <small th:text="#{details.contact}">संपर्क</small>
+              <strong th:text="${school.contact}">क्रमांक</strong>
+            </div>
+          </div>
+
+          <div class="contact-pill" th:if="${school.email != null && !school.email.isBlank()}">
+            <span class="pill-icon">✉️</span>
+            <div>
+              <small th:text="#{reg.email}">ई-मेल</small>
+              <strong th:text="${school.email}">ईमेल</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="content-grid mt-4">
+      <!-- Left Column: Needs List -->
+      <section class="needs-column">
+        <div class="section-title-wrap">
+          <span class="eyebrow" th:text="#{schoolDash.needsList}">शैक्षणिक गरजा</span>
+          <h2 th:text="#{details.needsTitle}">शाळेच्या गरजा</h2>
+        </div>
+
+        <div class="empty-state" th:if="${needs.isEmpty()}">
+          <div class="empty-icon">📝</div>
+          <h3 th:text="#{details.noNeeds}">सध्या या शाळेसाठी कोणतीही सक्रिय गरज नोंदवलेली नाही.</h3>
+        </div>
+
+        <article class="need-card wide reveal" th:each="n : ${needs}">
+          <div class="need-head">
+            <span class="category-tag" th:text="#{${'cat.' + n.category}}">श्रेणी</span>
+            <div class="need-meta-tags">
+              <span class="priority-pill" th:classappend="${n.priority}" th:text="#{${'priority.' + n.priority}}">NORMAL</span>
+              <span class="need-status" th:classappend="${n.status}" th:text="#{${'status.' + n.status}}">OPEN</span>
+            </div>
+          </div>
+
+          <h3 th:text="${n.title}">गरजेचे शीर्षक</h3>
+          <p th:text="${n.description}">वर्णन...</p>
+
+          <div class="progress-meta">
+            <span><span th:text="#{details.raised}">मिळाले</span>: <strong th:text="'₹' + ${#numbers.formatDecimal(n.receivedAmount, 1, 0)}">₹०</strong></span>
+            <span><span th:text="#{details.goal}">लक्ष्य</span>: <strong th:text="'₹' + ${#numbers.formatDecimal(n.targetAmount, 1, 0)}">₹०</strong></span>
+          </div>
+          <div class="progress-bar">
+            <i th:style="'width:' + ${n.percentRaised} + '%'"></i>
+          </div>
+
+          <div class="need-action">
+            <small><span th:text="${n.percentRaised}">0</span>%</small>
+
+            <div class="action-btn-wrap" th:if="${n.status != 'FUNDED'}">
+              <a class="btn btn-primary btn-sm" th:if="${session.role == 'DONOR'}" th:href="@{'/donate/' + ${n.id}}" th:text="#{details.donateBtn}">या गरजेला मदत करा</a>
+              <a class="btn btn-soft btn-sm" th:if="${session.uid == null}" href="/login" th:text="#{details.loginToDonate}">लॉगिन करून मदत करा</a>
+            </div>
+            <span class="status-pill verified" th:if="${n.status == 'FUNDED'}" th:text="#{status.FUNDED}">🎯 निधी पूर्ण</span>
+          </div>
+        </article>
+      </section>
+
+      <!-- Right Column: Progress Updates Timeline & Donations -->
+      <aside class="sidebar-column">
+        <!-- Progress Updates Card -->
+        <div class="impact-card">
+          <div class="impact-icon">📈</div>
+          <span class="eyebrow" th:text="#{home.step4.title}">पारदर्शकता आणि प्रगती</span>
+          <h3 th:text="#{details.progressTitle}">प्रगती आणि परिणाम</h3>
+          <p class="text-muted small" th:text="#{prog.desc}">शाळेने प्रत्यक्ष कामाबद्दल प्रसिद्ध केलेले अधिकृत अहवाल:</p>
+
+          <div th:if="${progress.isEmpty()}" class="mini-empty" th:text="#{details.noProgress}">
+            अजून प्रगती अहवाल उपलब्ध नाही.
+          </div>
+
+          <div class="timeline-stream" th:each="p : ${progress}">
+            <div class="timeline-entry">
+              <div class="timeline-dot"></div>
+              <div class="timeline-body">
+                <div class="timeline-top">
+                  <strong th:text="${p.title}">अपडेट शीर्षक</strong>
+                  <span class="percent-badge" th:text="${p.progressPercent} + '%'">०%</span>
+                </div>
+                <div class="progress-bar tiny">
+                  <i th:style="'width:' + ${p.progressPercent} + '%'"></i>
+                </div>
+                <p class="timeline-desc" th:text="${p.description}">वर्णन...</p>
+                <div class="timeline-image-wrap" th:if="${p.imageUrl != null && !p.imageUrl.isBlank()}">
+                  <img th:src="${p.imageUrl}" alt="Progress Photo" class="timeline-img" onerror="this.style.display='none'">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Donations Summary Card -->
+        <div class="panel-card mt-3">
+          <div class="panel-header">
+            <h4 th:text="'🤝 ' + #{details.totalSupported}">🤝 मिळालेले साहाय्य</h4>
+            <span class="amount-highlight" th:text="'₹' + ${#numbers.formatDecimal(totalReceived, 1, 0)}">₹०</span>
+          </div>
+          <div th:if="${donations.isEmpty()}" class="mini-empty" th:text="#{donorDash.noDonations}">
+            या शाळेसाठी अजून पहिले योगदान नोंदवले गेलेले नाही.
+          </div>
+          <div class="mini-donation-list" th:each="d : ${donations}">
+            <div class="mini-don-row">
+              <div>
+                <strong th:text="'👤 ' + ${d.donor != null ? d.donor.fullName : 'Anonymous'}">👤 देणगीदार</strong>
+                <small class="text-muted" th:text="${#temporals.format(d.donationDate, 'dd/MM/yyyy')}">तारिख</small>
+              </div>
+              <span class="amount-tag" th:text="'₹' + ${#numbers.formatDecimal(d.amount, 1, 0)}">₹५००</span>
+            </div>
+            <p class="don-msg" th:if="${d.message != null && !d.message.isBlank()}" th:text="'&ldquo;' + ${d.message} + '&rdquo;'"></p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{error.500.title})}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<main class="page error-page">
+  <div class="container text-center py-5">
+    <div class="error-visual">⚠️</div>
+    <h1 class="error-code">500</h1>
+    <h2 class="error-title" th:text="#{error.500.title}">सर्व्हर त्रुटी निर्माण झाली</h2>
+    <p class="error-lead text-muted" th:text="#{error.500.desc}">
+      काही तांत्रिक अडचण निर्माण झाली आहे. कृपया थोड्या वेळाने पुन्हा प्रयत्न करा.
+    </p>
+    <div class="error-actions mt-4">
+      <a href="/" class="btn btn-primary btn-lg" th:text="#{nav.home}">मुख्यपृष्ठ</a>
+      <a href="/login" class="btn btn-outline btn-lg" th:text="#{nav.login}">प्रवेश करा</a>
+    </div>
+  </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script src="/js/app.js"></script>
+</body>
+</html>

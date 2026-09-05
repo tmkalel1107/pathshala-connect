@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="mr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{adminDash.title})}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: nav}"></div>
+
+<main class="page">
+  <div class="container-wide">
+    <!-- Localized Flash Alerts -->
+    <div th:replace="~{fragments/alerts :: messages}"></div>
+
+    <!-- Admin Hero Header -->
+    <section class="dashboard-hero reveal">
+      <div>
+        <span class="eyebrow" th:text="#{adminDash.badge}">मुख्य प्रशासन कक्ष</span>
+        <h1 th:text="#{adminDash.title}">प्रशासक नियंत्रण कक्ष 🛡️</h1>
+        <p th:text="#{adminDash.desc}">शाळा मंजुरी, शैक्षणिक गरजा, प्रगती अहवाल, वापरकर्ते आणि देणगी हिशोब व्यवस्थापन.</p>
+      </div>
+      <div class="hero-actions">
+        <a href="#createAdminSection" class="btn btn-primary" onclick="switchAdminTab('createAdminTab')" th:text="'➕ ' + #{adminDash.quickAddAdmin}">➕ नवीन प्रशासक जोडा</a>
+        <a href="/transparency" class="btn btn-soft" th:text="#{adminDash.viewTrans}">पारदर्शकता अहवाल →</a>
+      </div>
+    </section>
+
+    <!-- Comprehensive KPI Metrics Cards Grid -->
+    <div class="metric-grid admin-metrics">
+      <div class="metric-card reveal">
+        <span th:text="#{adminDash.kpiPending}">पडताळणी प्रलंबित शाळा</span>
+        <strong class="text-warning" th:text="${pendingSchools.size()}">0</strong>
+        <small th:text="#{adminDash.kpiPendingSub}">तातडीने पडताळणी आवश्यक</small>
+      </div>
+
+      <div class="metric-card reveal delay-1">
+        <span th:text="#{adminDash.kpiVerified}">पडताळलेल्या शाळा</span>
+        <strong class="text-success" th:text="${verifiedSchools.size()}">0</strong>
+        <small th:text="#{adminDash.kpiTotalSchools} + ': ' + ${totalSchools}"></small>
+      </div>
+
+      <div class="metric-card reveal delay-2">
+        <span th:text="#{adminDash.kpiFunds}">एकूण जमा निधी</span>
+        <strong class="text-success" th:text="'₹' + ${#numbers.formatDecimal(totalDonations, 1, 0)}">₹०</strong>
+        <small th:text="${allDonations.size()} + ' ' + #{adminDash.kpiDonationCount}">० देणगी नोंदी</small>
+      </div>
+
+      <div class="metric-card reveal delay-3">
+        <span th:text="#{adminDash.kpiUsers}">प्लॅटफॉर्म वापरकर्ते</span>
+        <strong th:text="${totalUsers}">0</strong>
+        <small th:text="${totalDonors} + ' ' + #{role.DONOR} + ' • ' + ${totalAdmins} + ' ' + #{role.ADMIN}"></small>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs for Admin Rights -->
+    <div class="admin-tab-nav mt-3">
+      <button type="button" class="tab-btn active" id="btn-pendingTab" onclick="switchAdminTab('pendingTab')">
+        🔔 <span th:text="#{adminDash.tabPending}">प्रलंबित शाळा</span> (<span th:text="${pendingSchools.size()}">0</span>)
+      </button>
+      <button type="button" class="tab-btn" id="btn-schoolsTab" onclick="switchAdminTab('schoolsTab')">
+        🏫 <span th:text="#{adminDash.tabSchools}">सर्व शाळा</span> (<span th:text="${allSchools.size()}">0</span>)
+      </button>
+      <button type="button" class="tab-btn" id="btn-needsTab" onclick="switchAdminTab('needsTab')">
+        📋 <span th:text="#{adminDash.tabNeeds}">शैक्षणिक गरजा</span> (<span th:text="${allNeeds.size()}">0</span>)
+      </button>
+      <button type="button" class="tab-btn" id="btn-updatesTab" onclick="switchAdminTab('updatesTab')">
+        📸 <span th:text="#{adminDash.tabUpdates}">प्रगती अहवाल</span> (<span th:text="${allUpdates.size()}">0</span>)
+      </button>
+      <button type="button" class="tab-btn" id="btn-usersTab" onclick="switchAdminTab('usersTab')">
+        👥 <span th:text="#{adminDash.tabUsers}">वापरकर्ते</span> (<span th:text="${allUsers.size()}">0</span>)
+      </button>
+      <button type="button" class="tab-btn" id="btn-donationsTab" onclick="switchAdminTab('donationsTab')">
+        💰 <span th:text="#{adminDash.tabDonations}">देणगी हिशोब</span> (<span th:text="${allDonations.size()}">0</span>)
+      </button>
+      <button type="button" class="tab-btn" id="btn-createAdminTab" onclick="switchAdminTab('createAdminTab')">
+        ➕ <span th:text="#{adminDash.tabCreateAdmin}">प्रशासक जोडा</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: Pending School Approvals -->
+    <section id="pendingTab" class="admin-tab-content active panel-card mt-3 reveal">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow" th:text="#{home.step2.title}">प्रशासन पडताळणी</span>
+          <h2 th:text="#{adminDash.pendingApprovals}">प्रलंबित शाळा</h2>
+          <p class="text-muted small m-0" th:text="#{adminDash.kpiPendingSub}">तातडीने पडताळणी आवश्यक</p>
+        </div>
+        <span class="pending-count-tag" th:text="${pendingSchools.size()} + ' ' + #{common.pending}">० प्रलंबित</span>
+      </div>
+
+      <div th:if="${pendingSchools.isEmpty()}" class="empty-state small-empty">
+        <div class="empty-icon">✓</div>
+        <h3 th:text="#{adminDash.noPending}">सध्या कोणतीही शाळा पडताळणीसाठी प्रलंबित नाही.</h3>
+        <p th:text="#{adminDash.allPendingDone}">सर्व नोंदणीकृत शाळांची पडताळणी पूर्ण झाली आहे.</p>
+      </div>
+
+      <div class="table-responsive" th:if="${!pendingSchools.isEmpty()}">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th th:text="#{adminDash.tblSchool}">शाळेचे नाव</th>
+              <th th:text="#{adminDash.tblDistrict}">जिल्हा / गाव</th>
+              <th th:text="#{adminDash.tblPrincipal}">मुख्याध्यापक</th>
+              <th th:text="#{adminDash.tblContact}">संपर्क / ई-मेल</th>
+              <th th:text="#{adminDash.tblRegDate}">नोंदणी दिनांक</th>
+              <th th:text="#{adminDash.tblActions}">प्रशासकीय कृती</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="s : ${pendingSchools}">
+              <td>
+                <strong><span th:text="${s.name}">शाळेचे नाव</span></strong>
+                <small class="d-block text-muted" th:text="${#strings.abbreviate(s.address, 60)}">पत्ता</small>
+              </td>
+              <td>
+                <span th:text="${s.district}">जिल्हा</span>
+                <small class="d-block text-muted" th:text="${s.villageCity}">गाव</small>
+              </td>
+              <td><span th:text="${s.principalName != null ? s.principalName : '-'}">-</span></td>
+              <td>
+                <span th:text="${s.contact}">संपर्क</span>
+                <small class="d-block text-muted" th:text="${s.email}">ईमेल</small>
+              </td>
+              <td><span th:text="${#temporals.format(s.createdAt, 'dd/MM/yyyy')}">दिनांक</span></td>
+              <td>
+                <div class="action-buttons-group">
+                  <form method="post" th:action="@{'/admin/schools/' + ${s.id} + '/verify'}" style="display:inline">
+                    <button type="submit" class="btn btn-primary btn-xs" th:text="#{adminDash.approve}">
+                      ✓ मंजूर करा
+                    </button>
+                  </form>
+                  <form method="post" th:action="@{'/admin/schools/' + ${s.id} + '/reject'}" style="display:inline">
+                    <button type="submit" class="btn btn-danger btn-xs" th:text="#{adminDash.reject}">
+                      ✗ नकार द्या
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 2: All Schools Management -->
+    <section id="schoolsTab" class="admin-tab-content panel-card mt-3">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow" th:text="#{adminDash.badge}">शाळा नियंत्रण</span>
+          <h2 th:text="#{adminDash.tabSchools}">सर्व शाळा</h2>
+          <p class="text-muted small m-0" th:text="#{schools.desc}">नोंदणीकृत शाळांची माहिती व व्यवस्थापन.</p>
+        </div>
+        <a href="/schools" class="text-link" target="_blank" th:text="#{home.featured.viewAll}">सर्व शाळा पाहा →</a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th th:text="#{adminDash.tblSchool}">शाळेचे नाव</th>
+              <th th:text="#{adminDash.tblDistrict}">जिल्हा / गाव</th>
+              <th th:text="#{adminDash.tblPrincipal}">मुख्याध्यापक</th>
+              <th th:text="#{adminDash.tblContact}">संपर्क</th>
+              <th th:text="#{adminDash.tabNeeds}">गरजा</th>
+              <th th:text="#{adminDash.tblStatus}">स्थिती</th>
+              <th th:text="#{adminDash.tblActions}">कृती</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="s : ${allSchools}">
+              <td>
+                <strong><a th:href="@{'/schools/' + ${s.id}}" th:text="${s.name}" class="school-link-bold">शाळा</a></strong>
+                <small class="d-block text-muted" th:text="${#strings.abbreviate(s.address, 45)}">पत्ता</small>
+              </td>
+              <td>
+                <span th:text="${s.district}">जिल्हा</span>
+                <small class="d-block text-muted" th:text="${s.villageCity}">गाव</small>
+              </td>
+              <td><span th:text="${s.principalName != null ? s.principalName : '-'}">-</span></td>
+              <td><span th:text="${s.contact}">संपर्क</span></td>
+              <td><span class="badge" th:text="${s.needs != null ? s.needs.size() : 0}">0</span></td>
+              <td>
+                <span class="status-pill" th:classappend="${s.status.toLowerCase()}" th:text="#{${'status.' + s.status}}">STATUS</span>
+              </td>
+              <td>
+                <div class="action-buttons-group">
+                  <a th:href="@{'/schools/' + ${s.id}}" class="btn btn-outline btn-xs" target="_blank" th:text="#{adminDash.viewPublic}">पाहा ↗</a>
+                  <form method="post" th:action="@{'/admin/schools/' + ${s.id} + '/delete'}" style="display:inline"
+                        th:data-confirm="#{adminDash.confirmDelSchool}"
+                        onsubmit="return confirm(this.getAttribute('data-confirm'))">
+                    <button type="submit" class="btn btn-danger btn-xs" th:text="#{adminDash.delete}">
+                      🗑️ काढून टाका
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 3: Educational Needs Moderation -->
+    <section id="needsTab" class="admin-tab-content panel-card mt-3">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow" th:text="#{adminDash.badge}">गरजा नियंत्रण</span>
+          <h2 th:text="#{adminDash.tabNeeds}">शैक्षणिक गरजा</h2>
+          <p class="text-muted small m-0" th:text="#{need.desc}">शाळांनी नोंदवलेल्या शैक्षणिक गरजांची तपासणी.</p>
+        </div>
+        <span class="soft-label" th:text="${allNeeds.size()} + ' ' + #{adminDash.tabNeeds}">०</span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th th:text="#{need.titleLabel}">गरजेचे शीर्षक</th>
+              <th th:text="#{adminDash.tblSchool}">शाळा</th>
+              <th th:text="#{adminDash.tblCategory}">श्रेणी</th>
+              <th th:text="#{adminDash.tblPriority}">प्राधान्य</th>
+              <th th:text="#{adminDash.tblTarget}">लक्ष्य रक्कम</th>
+              <th th:text="#{adminDash.tblProgress}">प्रगती</th>
+              <th th:text="#{adminDash.tblStatus}">स्थिती</th>
+              <th th:text="#{adminDash.tblActions}">कृती</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="n : ${allNeeds}">
+              <td>
+                <strong th:text="${n.title}">गरज</strong>
+                <small class="d-block text-muted" th:text="${#strings.abbreviate(n.description, 50)}">वर्णन</small>
+              </td>
+              <td>
+                <span th:text="${n.school != null ? n.school.name : '-'}">शाळा</span>
+                <small class="d-block text-muted" th:if="${n.school != null}" th:text="${n.school.district}">जिल्हा</small>
+              </td>
+              <td><span class="category-tag" th:text="#{${'cat.' + n.category}}">श्रेणी</span></td>
+              <td>
+                <span class="priority-pill" th:classappend="${n.priority}" th:text="#{${'priority.' + n.priority}}">NORMAL</span>
+              </td>
+              <td>
+                <strong th:text="'₹' + ${#numbers.formatDecimal(n.targetAmount, 1, 0)}">₹०</strong>
+                <small class="d-block text-success" th:text="#{adminDash.tblReceived} + ': ₹' + ${#numbers.formatDecimal(n.receivedAmount, 1, 0)}">जमा: ₹०</small>
+              </td>
+              <td>
+                <div class="progress-bar tiny" style="width: 80px;">
+                  <i th:style="'width:' + ${n.percentRaised} + '%'"></i>
+                </div>
+                <small><span th:text="${n.percentRaised}">0</span>%</small>
+              </td>
+              <td>
+                <span class="status-pill" th:classappend="${n.status == 'OPEN' ? 'verified' : (n.status == 'FUNDED' ? 'funded' : 'rejected')}"
+                      th:text="#{${'status.' + n.status}}">STATUS</span>
+              </td>
+              <td>
+                <div class="action-buttons-group">
+                  <form method="post" th:action="@{'/admin/needs/' + ${n.id} + '/toggle-status'}" style="display:inline">
+                    <button type="submit" class="btn btn-outline btn-xs"
+                            th:text="${n.status == 'OPEN' ? #messages.msg('adminDash.toggleClose') : #messages.msg('adminDash.toggleOpen')}">
+                      Toggle
+                    </button>
+                  </form>
+                  <form method="post" th:action="@{'/admin/needs/' + ${n.id} + '/delete'}" style="display:inline"
+                        th:data-confirm="#{adminDash.confirmDelNeed}"
+                        onsubmit="return confirm(this.getAttribute('data-confirm'))">
+                    <button type="submit" class="btn btn-danger btn-xs" th:text="#{adminDash.delete}">
+                      🗑️
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 4: Progress Updates Moderation -->
+    <section id="updatesTab" class="admin-tab-content panel-card mt-3">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow" th:text="#{adminDash.badge}">प्रगती अहवाल नियंत्रण</span>
+          <h2 th:text="#{adminDash.tabUpdates}">प्रगती अहवाल</h2>
+          <p class="text-muted small m-0" th:text="#{prog.desc}">शाळांनी प्रसिद्ध केलेले प्रगती अहवाल आणि फोटो.</p>
+        </div>
+        <span class="soft-label" th:text="${allUpdates.size()} + ' ' + #{adminDash.tabUpdates}">०</span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th th:text="#{adminDash.tblPhoto}">फोटो</th>
+              <th th:text="#{prog.titleLabel}">शीर्षक / वर्णन</th>
+              <th th:text="#{adminDash.tblSchool}">शाळा</th>
+              <th th:text="#{prog.percent}">पूर्णत्व</th>
+              <th th:text="#{adminDash.tblDate}">दिनांक</th>
+              <th th:text="#{adminDash.tblActions}">कृती</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="u : ${allUpdates}">
+              <td style="width: 80px;">
+                <img th:if="${u.imageUrl != null && !u.imageUrl.isBlank()}" th:src="${u.imageUrl}"
+                     alt="Photo" style="width: 60px; height: 45px; object-fit: cover; border-radius: 6px;"
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 80%22><rect fill=%22%23eee%22 width=%22100%22 height=%2280%22/><text y=%2250%22 font-size=%2220%22 fill=%22%23999%22 x=%2220%22>Photo</text></svg>'">
+                <span th:if="${u.imageUrl == null || u.imageUrl.isBlank()}" class="text-muted small">-</span>
+              </td>
+              <td>
+                <strong th:text="${u.title}">अपडेट शीर्षक</strong>
+                <small class="d-block text-muted" th:text="${#strings.abbreviate(u.description, 70)}">वर्णन</small>
+              </td>
+              <td>
+                <span th:text="${u.school != null ? u.school.name : '-'}">शाळा</span>
+              </td>
+              <td>
+                <span class="percent-badge" th:text="${u.progressPercent} + '%'">०%</span>
+                <div class="progress-bar tiny" style="width: 60px;">
+                  <i th:style="'width:' + ${u.progressPercent} + '%'"></i>
+                </div>
+              </td>
+              <td><span th:text="${#temporals.format(u.createdAt, 'dd/MM/yyyy')}">दिनांक</span></td>
+              <td>
+                <form method="post" th:action="@{'/admin/progress/' + ${u.id} + '/delete'}" style="display:inline"
+                      th:data-confirm="#{adminDash.confirmDelUpdate}"
+                      onsubmit="return confirm(this.getAttribute('data-confirm'))">
+                  <button type="submit" class="btn btn-danger btn-xs" th:text="#{adminDash.delete}">
+                    🗑️ काढून टाका
+                  </button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 5: Platform Users Management -->
+    <section id="usersTab" class="admin-tab-content panel-card mt-3">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow" th:text="#{adminDash.badge}">वापरकर्ते नियंत्रण</span>
+          <h2 th:text="#{adminDash.tabUsers}">वापरकर्ते</h2>
+          <p class="text-muted small m-0" th:text="#{adminDash.usersList}">सर्व वापरकर्त्यांची खाती आणि स्थिती.</p>
+        </div>
+        <span class="soft-label" th:text="${allUsers.size()} + ' ' + #{adminDash.tabUsers}">०</span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th th:text="#{reg.fullName}">नाव</th>
+              <th th:text="#{reg.email}">ई-मेल</th>
+              <th th:text="#{footer.roles}">भूमिका</th>
+              <th th:text="#{reg.phone}">मोबाईल</th>
+              <th th:text="#{reg.organization}">संस्था</th>
+              <th th:text="#{adminDash.tblStatus}">स्थिती</th>
+              <th th:text="#{adminDash.tblActions}">कृती</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="u : ${allUsers}">
+              <td><strong th:text="${u.fullName}">नाव</strong></td>
+              <td><span th:text="${u.email}">ईमेल</span></td>
+              <td>
+                <span class="role-pill" th:classappend="${u.role}" th:text="#{${'role.' + u.role}}">ROLE</span>
+              </td>
+              <td><span th:text="${u.phone != null ? u.phone : '-'}">-</span></td>
+              <td><span th:text="${u.organization != null && !u.organization.isBlank() ? u.organization : '-'}">-</span></td>
+              <td>
+                <span class="status-pill" th:classappend="${u.active ? 'verified' : 'rejected'}"
+                      th:text="${u.active ? #messages.msg('adminDash.active') : #messages.msg('adminDash.inactive')}">Active</span>
+              </td>
+              <td>
+                <div class="action-buttons-group">
+                  <form method="post" th:action="@{'/admin/users/' + ${u.id} + '/toggle-status'}" style="display:inline" th:if="${u.role != 'ADMIN'}">
+                    <button type="submit" class="btn btn-outline btn-xs"
+                            th:text="${u.active ? #messages.msg('adminDash.toggleInactive') : #messages.msg('adminDash.toggleActive')}">
+                      Toggle
+                    </button>
+                  </form>
+                  <form method="post" th:action="@{'/admin/users/' + ${u.id} + '/delete'}" style="display:inline" th:if="${u.id != user.id}"
+                        th:data-confirm="#{adminDash.confirmDelUser}"
+                        onsubmit="return confirm(this.getAttribute('data-confirm'))">
+                    <button type="submit" class="btn btn-danger btn-xs" th:text="#{adminDash.delete}">
+                      🗑️
+                    </button>
+                  </form>
+                  <span class="text-muted small" th:if="${u.id == user.id}" th:text="#{adminDash.ownAccount}">स्वतःचे खाते</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 6: Complete Financial & Donation Audit Ledger -->
+    <section id="donationsTab" class="admin-tab-content panel-card mt-3">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow" th:text="#{adminDash.badge}">हिशोब व ऑडिट</span>
+          <h2 th:text="#{adminDash.tabDonations}">देणगी हिशोब</h2>
+          <p class="text-muted small m-0" th:text="#{trans.desc}">सर्व आर्थिक व्यवहारांची पारदर्शक नोंद.</p>
+        </div>
+        <span class="amount-badge" th:text="#{adminDash.kpiFunds} + ': ₹' + ${#numbers.formatDecimal(totalDonations, 1, 0)}">एकूण जमा: ₹०</span>
+      </div>
+
+      <div th:if="${allDonations.isEmpty()}" class="empty-state small-empty">
+        <div class="empty-icon">📊</div>
+        <h3 th:text="#{adminDash.noDonations}">कोणतीही देणगी नोंदवलेली नाही.</h3>
+      </div>
+
+      <div class="table-responsive" th:if="${!allDonations.isEmpty()}">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th th:text="#{adminDash.tblDate}">दिनांक</th>
+              <th th:text="#{adminDash.tblDonor}">देणगीदार</th>
+              <th th:text="#{adminDash.tblSchool}">शाळा</th>
+              <th th:text="#{adminDash.tabNeeds}">गरज</th>
+              <th th:text="#{adminDash.tblAmount}">रक्कम</th>
+              <th th:text="#{adminDash.tblPaymentMethod}">पद्धत</th>
+              <th th:text="#{adminDash.tblTxnRef}">नोंद क्रमांक</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="d : ${allDonations}">
+              <td><span th:text="${#temporals.format(d.donationDate, 'dd/MM/yyyy HH:mm')}">दिनांक</span></td>
+              <td><strong th:text="${d.donor != null ? d.donor.fullName : 'Anonymous'}">नाव</strong></td>
+              <td><span th:text="${d.school != null ? d.school.name : '-'}">शाळा</span></td>
+              <td><span th:text="${d.need != null ? d.need.title : '-'}">गरज</span></td>
+              <td><strong class="text-success" th:text="'₹' + ${#numbers.formatDecimal(d.amount, 1, 0)}">₹०</strong></td>
+              <td><span class="badge" th:text="${d.paymentMethod}">DEMO_UPI</span></td>
+              <td><code><span th:text="${d.transactionRef}">TXN-123</span></code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 7: Create New Admin Directly (Logged-in Admins only) -->
+    <section id="createAdminTab" class="admin-tab-content panel-card mt-3">
+      <div class="panel-header">
+        <div>
+          <span class="eyebrow" th:text="#{adminDash.badge}">प्रशासन विस्तार</span>
+          <h2 th:text="#{adminDash.createAdminTitle}">नवीन प्रशासक तयार करा</h2>
+          <p class="text-muted small m-0" th:text="#{adminDash.createAdminDesc}">प्लॅटफॉर्म व्यवस्थापनासाठी नवीन प्रशासक खाते थेट जोडा.</p>
+        </div>
+        <span class="role-pill ADMIN" th:text="#{role.ADMIN}">🛡️ ADMIN</span>
+      </div>
+
+      <form method="post" action="/admin/create-admin" class="form-stack narrow" style="max-width: 650px;">
+        <div class="input-grid">
+          <label>
+            <span th:text="#{reg.fullName}">पूर्ण नाव *</span>
+            <input type="text" name="fullName" required th:placeholder="${#locale.language == 'en' ? 'e.g. Tushar Sawant' : 'उदा. प्रा. तुषार सावंत'}">
+          </label>
+
+          <label>
+            <span th:text="#{reg.email}">अधिकृत ई-मेल *</span>
+            <input type="email" name="email" required placeholder="admin2@pathshala.com">
+          </label>
+
+          <label>
+            <span th:text="#{reg.phone}">मोबाईल क्रमांक *</span>
+            <input type="tel" name="phone" pattern="[0-9]{10}" maxlength="10" required th:placeholder="${#locale.language == 'en' ? '10-digit mobile number' : '१० अंकी मोबाईल क्रमांक'}">
+          </label>
+
+          <label>
+            <span th:text="#{reg.organization}">विभाग किंवा संस्था</span>
+            <input type="text" name="organization" th:value="${#locale.language == 'en' ? 'Pathshala Connect Administration' : 'पाठशाळा कनेक्ट मुख्य प्रशासन'}">
+          </label>
+
+          <label>
+            <span th:text="#{reg.password}">पासवर्ड *</span>
+            <div class="password-wrap">
+              <input id="np1" type="password" name="password" minlength="6" required th:placeholder="${#locale.language == 'en' ? 'Minimum 6 characters' : 'किमान ६ अक्षरे'}">
+              <button type="button" class="password-toggle" onclick="togglePassword('np1', this)" th:text="#{login.show}">दाखवा</button>
+            </div>
+          </label>
+
+          <label>
+            <span th:text="#{reg.confirmPassword}">पासवर्ड खात्री करा *</span>
+            <div class="password-wrap">
+              <input id="np2" type="password" name="confirmPassword" minlength="6" required th:placeholder="${#locale.language == 'en' ? 'Re-enter password' : 'पासवर्ड पुन्हा टाका'}">
+              <button type="button" class="password-toggle" onclick="togglePassword('np2', this)" th:text="#{login.show}">दाखवा</button>
+            </div>
+          </label>
+        </div>
+
+        <div class="form-actions mt-3">
+          <button type="submit" class="btn btn-primary btn-lg" th:text="'🛡️ ' + #{adminDash.createAdminBtn}">
+            🛡️ प्रशासक तयार करा
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+</main>
+
+<div th:replace="~{fragments/footer :: foot}"></div>
+<script src="/js/app.js"></script>
+<script>
+function switchAdminTab(tabId) {
+  document.querySelectorAll('.admin-tab-content').forEach(el => {
+    el.classList.remove('active');
+    el.style.display = 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  const activeContent = document.getElementById(tabId);
+  if (activeContent) {
+    activeContent.classList.add('active');
+    activeContent.style.display = 'block';
+  }
+
+  const activeBtn = document.getElementById('btn-' + tabId);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+  }
+
+  window.location.hash = tabId;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const hash = window.location.hash.replace('#', '');
+  if (hash && document.getElementById(hash)) {
+    switchAdminTab(hash);
+  } else {
+    switchAdminTab('pendingTab');
+  }
+});
+</script>
+</body>
+</html>
